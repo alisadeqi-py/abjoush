@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+:root {
+  --background: 30 20% 96%;
+  --foreground: 24 10% 10%;
+  --border: 30 10% 85%;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-vazirmatn), system-ui, sans-serif;
+}
+
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-sans);
+}
+
+/* Hide scrollbar across browsers while preserving scroll functionality */
+.scrollbar-hidden {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.scrollbar-hidden::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+@layer components {
+  .product-card {
+    background: white;
+    border-radius: 1rem;
+    border: 1px solid #eae5de;
+    padding: 0.75rem;
+    text-align: center;
+    min-width: 200px;
+    max-width: 220px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    transition: all 0.2s ease;
+  }
+  .product-card:hover {
+    border-color: #d4cbc0;
+    box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.08);
+  }
+
+  .badge-soft {
+    background: #f2efe9;
+    color: #4b3f34;
+    font-weight: 500;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    letter-spacing: 0.01em;
+  }
+
+  .unit-tag {
+    background: #f2efe9;
+    color: #4b3f34;
+    font-weight: 500;
+    font-size: 0.65rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+  }
+
+  .price-tag {
+    font-weight: 600;
+    color: #1e1a16;
+    letter-spacing: -0.01em;
+  }
+
+  .badge-grade-nik {
+    background: #ecfdf5;
+    color: #065f46;
+  }
+
+  .badge-grade-motevaset {
+    background: #fffbeb;
+    color: #92400e;
+  }
+}
+
