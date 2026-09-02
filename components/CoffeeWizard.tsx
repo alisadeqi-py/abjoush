@@ -3,12 +3,12 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
-import type { BrewMethod, Origin } from "@/lib/content";
+import { RatingKey, type BrewMethod, type Origin, originDisplay } from "@/lib/content";
 
 type Stage = "hero" | "method" | "ratio" | "origin" | "summary";
 type Overlay = "none" | "intro" | "ratio-intro";
 
-const RATING_LABELS: Array<[keyof Origin, string]> = [
+const RATING_LABELS: Array<[RatingKey, string]> = [
     ["acidity", "اسیدیته"],
     ["body", "بادی"],
     ["sweetness", "شیرینی"],
@@ -158,10 +158,10 @@ export default function CoffeeWizard({
             {/* Brew-method carousel */}
             {stage === "method" && (
                 <div
-                    className="absolute bottom-[4%] left-1/2 w-full max-w-[92%] -translate-x-1/2 transition-opacity duration-500 sm:max-w-175"
+                    className="absolute bottom-[4%] left-1/2 w-full max-w-[92%] -translate-x-1/2 transition-opacity duration-500 sm:max-w-[44rem]"
                     style={{ opacity: panelVisible ? 1 : 0 }}
                 >
-                    <div dir="rtl" className="flex snap-x gap-3 overflow-x-auto overflow-y-hidden scroll-smooth pb-2 scrollbar-hidden">
+                    <div dir="rtl" className="flex gap-3 overflow-auto pb-2 scrollbar-hidden flex-nowrap">
                         {brewMethods.map((method) => (
                             <button
                                 key={method.id}
@@ -188,7 +188,7 @@ export default function CoffeeWizard({
             {/* Robusta / Arabica ratio step */}
             {stage === "ratio" && (
                 <div
-                    className="absolute bottom-[4%] left-1/2 w-full max-w-[92%] -translate-x-1/2 transition-opacity duration-500 sm:max-w-175"
+                    className="absolute bottom-[4%] left-1/2 w-full max-w-[92%] -translate-x-1/2 transition-opacity duration-500 sm:max-w-[44rem]"
                     style={{ opacity: panelVisible ? 1 : 0 }}
                 >
                     <div className="mb-2 flex items-center justify-around">
@@ -268,7 +268,7 @@ export default function CoffeeWizard({
                                     <tr>
                                         {RATING_LABELS.map(([key]) => (
                                             <td key={String(key)} className="border border-black/10 px-2 py-1">
-                                                {(focusedOrigin as any)[`${String(key)}_display`]}
+                                                {focusedOrigin ? originDisplay(focusedOrigin, key) : ""}
                                             </td>
                                         ))}
                                     </tr>
@@ -293,7 +293,7 @@ export default function CoffeeWizard({
                     )}
 
                     {stage === "origin" && (
-                        <div dir="rtl" className="flex snap-x justify-center gap-3 overflow-x-auto overflow-y-hidden pb-2 scrollbar-hidden">
+                        <div dir="rtl" className="flex justify-center gap-3 overflow-auto pb-2 scrollbar-hidden flex-nowrap">
                             {origins.map((origin) => (
                                 <button
                                     key={origin.id}
@@ -330,7 +330,7 @@ export default function CoffeeWizard({
                             <div className="mx-auto mb-4 grid max-w-xs grid-cols-2 gap-2 text-xs">
                                 {RATING_LABELS.map(([key, label]) => (
                                     <div key={String(key)} className="rounded-md bg-black/5 px-2 py-1">
-                                        {label}: {(selectedOrigin as any)[`${String(key)}_display`]}
+                                        {label}: {selectedOrigin ? originDisplay(selectedOrigin, key) : ""}
                                     </div>
                                 ))}
                             </div>

@@ -1,6 +1,6 @@
 export function ReadMore() {
   return (
-    <section className="w-full mt-16 bg-[f#fefaf7] rounded-3xl border border-[#eae5de] p-6 md:p-8 shadow-sm">
+    <section className="w-full mt-16 bg-[#fefaf7] rounded-3xl border border-[#eae5de] p-6 md:p-8 shadow-sm">
       <h2 className="text-2xl md:text-3xl font-bold text-[#5c2706] tracking-tight mb-6">
         بیشتر بخوانید
       </h2>

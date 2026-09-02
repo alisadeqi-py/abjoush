@@ -11,21 +11,19 @@ import { Tags } from "@/components/tags";
 
 export default function Home() {
   return (
-    <main className="min-h-screen flex items-center justify-center">
-      <div className="w-full mx-auto">
-        <CoffeeWizard brewMethods={BREW_METHODS} origins={ORIGINS} />
-        <div className="w-full mx-auto max-w-7xl">
-          <CategoryFilter />
-          <CoffeeShowcase title="پرفروش ترین ها" subtitle="قهوه‌ای برای هر سلیقه" />
-          <CoffeeShowcase title="جدیدترین ها" subtitle="قهوه‌ای برای کشف کردن" />
-          <CoffeeShowcase title="پیشنهاد ویژه" subtitle="قهوه‌ای برای علاقه‌مندان" />
-          <CoffeeShowcase title="محبوب ترین ها" subtitle="قهوه‌ای برای هر سلیقه" />
-          <Testimonials />
-          <AboutCoffee />
-          <ReadMore />
-          <FAQ />
-          <Tags />
-        </div>
+    <main className="min-h-screen w-full">
+      <CoffeeWizard brewMethods={BREW_METHODS} origins={ORIGINS} />
+      <div className="w-full max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+        <CategoryFilter />
+        <CoffeeShowcase title="پرفروش ترین ها" subtitle="قهوه‌ای برای هر سلیقه" />
+        <CoffeeShowcase title="جدیدترین ها" subtitle="قهوه‌ای برای کشف کردن" />
+        <CoffeeShowcase title="پیشنهاد ویژه" subtitle="قهوه‌ای برای علاقه‌مندان" />
+        <CoffeeShowcase title="محبوب ترین ها" subtitle="قهوه‌ای برای هر سلیقه" />
+        <Testimonials />
+        <AboutCoffee />
+        <ReadMore />
+        <FAQ />
+        <Tags />
       </div>
     </main>
   );

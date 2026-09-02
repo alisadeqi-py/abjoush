@@ -15,6 +15,19 @@
 
 export type RatingLevel = "low" | "medium" | "good" | "high";
 
+export type RatingKey = "acidity" | "body" | "sweetness" | "aroma" | "bitterness";
+
+/** Get display value for a rating key on an Origin. */
+export function originDisplay(origin: Origin, key: RatingKey): string {
+  switch (key) {
+    case "acidity": return origin.acidity_display;
+    case "body": return origin.body_display;
+    case "sweetness": return origin.sweetness_display;
+    case "aroma": return origin.aroma_display;
+    case "bitterness": return origin.bitterness_display;
+  }
+}
+
 export type BrewMethod = {
   id: number;
   name: string;

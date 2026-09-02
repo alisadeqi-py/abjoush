@@ -1,4 +1,8 @@
+"use client";
+
 import { PlayIcon } from "./icons";
+import { useHorizontalScroll } from "@/hooks/useHorizontalScroll";
+import { TESTIMONIAL_CARD_WIDTH, CARD_GAP } from "@/lib/constants";
 
 // Voice testimonial data
 const voiceTestimonials = [
@@ -34,7 +38,6 @@ const voiceTestimonials = [
         avatar: "سم",
         text: "اگر عاشق قهوه هستید، آبجوش رو از دست ندهید. کیفیت و طعمشون همیشه ثابت و عالیه.",
     },
-
     {
         id: 5,
         name: "امیر رضایی",
@@ -46,6 +49,8 @@ const voiceTestimonials = [
 ];
 
 export function Testimonials() {
+    const { scrollRef, onMouseDown } = useHorizontalScroll(TESTIMONIAL_CARD_WIDTH, CARD_GAP);
+
     return (
         <section className="w-full mt-16 backdrop:blur-sm border border-[#e0dcd6] rounded-2xl p-6 md:p-10">
             {/* Section Header */}
@@ -60,13 +65,15 @@ export function Testimonials() {
 
             {/* Horizontal scroll – Voice testimonials */}
             <div
-                className="flex gap-4 overflow-x-auto pb-6 pt-2 snap-x snap-mandatory scrollbar-hidden"
-                style={{ scrollBehavior: "smooth" }}
+                ref={scrollRef}
+                aria-label="نظرات مشتریان - اسکرول افقی"
+                className="flex gap-4 overflow-auto pb-6 pt-2 scrollbar-hidden flex-nowrap cursor-grab"
+                onMouseDown={onMouseDown}
             >
                 {voiceTestimonials.map((item) => (
                     <div
                         key={item.id}
-                        className="min-w-50 max-w-55 bg-[#fefbfd] rounded-2xl border border-[#eae5de] p-4 shadow-sm shrink-0 snap-start hover:shadow-md transition-shadow"
+                        className="min-w-[280px] max-w-[300px] bg-[#fefbfd] rounded-2xl border border-[#eae5de] p-4 shadow-sm shrink-0 hover:shadow-md transition-shadow"
                     >
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-[#f2efe9] flex items-center justify-center text-[#4b3f34] font-semibold text-sm">

@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, useState, useEffect, useCallback } from "react";
-import type { MouseEvent as ReactMouseEvent } from "react";
 import { ProductCard, type ProductCardProps } from "./product-card";
 import { ScrollButton } from "./scroll-button";
+import { useHorizontalScroll } from "@/hooks/useHorizontalScroll";
+import { PRODUCT_CARD_WIDTH, CARD_GAP } from "@/lib/constants";
 
 const products: (Omit<ProductCardProps, "gradeType"> & {
   gradeType: "nik" | "motevaset";
@@ -21,109 +21,35 @@ const products: (Omit<ProductCardProps, "gradeType"> & {
   { id: 10, name: "قهوه دانه عربیکا", weight: "۵۰۰ گرم", price: "۲,۱۰۰,۰۰۰", grade: "نیک", gradeType: "nik", image: "☕", type: "دانه" },
 ];
 
+export interface CoffeeShowcaseProps {
+  title?: string;
+  subtitle?: string;
+  products?: (Omit<ProductCardProps, "gradeType"> & {
+    gradeType: "nik" | "motevaset";
+    id: number;
+  })[];
+}
+
 export function CoffeeShowcase({
   title = "پرفروش ترین ها",
   subtitle = "قهوه‌ای برای هر سلیقه",
-}) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [showLeftFade, setShowLeftFade] = useState(false);
-  const [showRightFade, setShowRightFade] = useState(false);
-  const isDragging = useRef(false);
-  const startX = useRef(0);
-  const startScrollLeft = useRef(0);
+  products: customProducts,
+}: CoffeeShowcaseProps) {
+  const items = customProducts ?? products;
 
-  const checkScroll = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const { scrollLeft, scrollWidth, clientWidth } = el;
-    setShowLeftFade(scrollLeft > 10);
-    setShowRightFade(scrollLeft < scrollWidth - clientWidth - 10);
-  }, []);
-
-  const scrollByAmount = useCallback((direction: "left" | "right") => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const cardWidth = 220 + 16; // card (max-w-[220px]) + gap (gap-4 = 16px)
-    el.scrollBy({
-      left: direction === "right" ? cardWidth : -cardWidth,
-      behavior: "smooth",
-    });
-  }, []);
-
-  // Convert vertical mouse-wheel to horizontal scroll (fixes desktop mouse wheel)
-  const handleWheel = useCallback((e: WheelEvent) => {
-    const el = scrollRef.current;
-    if (!el) return;
-
-    const target = e.target as HTMLElement;
-    if (!el.contains(target)) return;
-
-    const canScrollX = el.scrollWidth > el.clientWidth + 1;
-    if (!canScrollX) return;
-
-    const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-    el.scrollLeft += delta;
-    e.preventDefault();
-  }, []);
-
-  // Mouse drag scrolling (click-and-drag to scroll horizontally)
-  const handleMouseDown = useCallback((e: ReactMouseEvent<HTMLDivElement>) => {
-    const el = scrollRef.current;
-    if (!el) return;
-
-    isDragging.current = true;
-    startX.current = e.clientX;
-    startScrollLeft.current = el.scrollLeft;
-    el.style.cursor = "grabbing";
-    el.style.userSelect = "none";
-    e.preventDefault();
-  }, []);
-
-  const handleMouseMove = useCallback((e: globalThis.MouseEvent) => {
-    if (!isDragging.current) return;
-    const el = scrollRef.current;
-    if (!el) return;
-
-    const delta = startX.current - e.clientX;
-    el.scrollLeft = startScrollLeft.current + delta;
-  }, []);
-
-  const handleMouseUp = useCallback(() => {
-    if (!isDragging.current) return;
-    const el = scrollRef.current;
-    if (!el) return;
-
-    isDragging.current = false;
-    el.style.cursor = "";
-    el.style.userSelect = "";
-  }, []);
-
-  useEffect(() => {
-    checkScroll();
-    const el = scrollRef.current;
-    if (!el) return;
-
-    el.addEventListener("scroll", checkScroll);
-    window.addEventListener("resize", checkScroll);
-    el.addEventListener("wheel", handleWheel, { passive: false });
-
-    const handleMouseMoveDoc = (e: globalThis.MouseEvent) => handleMouseMove(e);
-    const handleMouseUpDoc = () => handleMouseUp();
-
-    document.addEventListener("mousemove", handleMouseMoveDoc);
-    document.addEventListener("mouseup", handleMouseUpDoc);
-
-    return () => {
-      el.removeEventListener("scroll", checkScroll);
-      window.removeEventListener("resize", checkScroll);
-      el.removeEventListener("wheel", handleWheel);
-      document.removeEventListener("mousemove", handleMouseMoveDoc);
-      document.removeEventListener("mouseup", handleMouseUpDoc);
-    };
-  }, [checkScroll, handleWheel, handleMouseMove, handleMouseUp]);
+  const {
+    scrollRef,
+    showLeftFade,
+    showRightFade,
+    scrollByAmount,
+    onMouseDown,
+  } = useHorizontalScroll(PRODUCT_CARD_WIDTH, CARD_GAP);
 
   return (
-    <div className="w-full relative border border-[#e0dcd6] pb-6 rounded-2xl px-4 md:px-6 lg:px-8 mt-10">
+    <section
+      aria-label={`اسکرول افقی ${title}`}
+      className="w-full relative border border-[#e0dcd6] pb-6 rounded-2xl bg-[#f8f6f3] px-4 md:px-6 lg:px-8 mt-10"
+    >
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-2xl md:text-3xl font-bold text-[#1f1b17] tracking-tight">
@@ -155,9 +81,9 @@ export function CoffeeShowcase({
         <div
           ref={scrollRef}
           className="flex gap-4 overflow-auto pb-6 pt-2 scroll-px-4 scrollbar-hidden flex-nowrap cursor-grab"
-          onMouseDown={handleMouseDown}
+          onMouseDown={onMouseDown}
         >
-          {products.map(({ id, ...props }) => (
+          {items.map(({ id, ...props }) => (
             <ProductCard key={id} {...props} />
           ))}
         </div>
@@ -165,13 +91,10 @@ export function CoffeeShowcase({
 
       {/* Scroll hint dots */}
       <div className="flex justify-center gap-1 mt-1">
-        {products.map((_, idx) => (
-          <span
-            key={idx}
-            className="w-1.5 h-1.5 rounded-full bg-[#d4cbc0]"
-          />
+        {items.map((_, idx) => (
+          <span key={idx} className="w-1.5 h-1.5 rounded-full bg-[#d4cbc0]" />
         ))}
       </div>
-    </div>
+    </section>
   );
 }

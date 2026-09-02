@@ -21,7 +21,7 @@ export function ProductCard({
     gradeType === "nik" ? "badge-grade-nik" : "badge-grade-motevaset";
 
   return (
-    <div className="product-card shrink-0 min-w-50 max-w-55 border border-[#e0dcd6] p-4 rounded-lg bg-transparent flex flex-col items-center justify-start">
+    <div className="product-card shrink-0 min-w-[200px] max-w-[220px] border border-[#e0dcd6] p-4 rounded-lg bg-[#f8f6f3] flex flex-col items-center justify-start snap-start">
       <div className="w-14 h-14 rounded-full bg-[#f2efe9] flex items-center justify-center text-2xl mx-auto mb-3">
         {image}
       </div>
