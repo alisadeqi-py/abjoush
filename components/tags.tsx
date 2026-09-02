@@ -1,35 +1,36 @@
 "use client";
 
 const tags = [
-    "جایهای جدید و گردشگری در ایران",
-    "دیدن فرهنگ و هنر در ایران",
-    "مکان های تفریحی رایگان ایران",
-    "تجربیات روزانه در ایران",
-    "مجابه‌بندی در ایران",
-    "فروشگاه‌ها در ایران",
-    "خرید کردن در ایران",
-    "خودکاران در ایران",
-    "پارک های ایران",
-    "سواحل بکر در ایران",
-    "تاریخ گردی در ایران",
-    "تاریخ وقوع بحران",
-    "روستاگردی در ایران",
+    "خرید قهوه",
+    "قهوه عربیکا",
+    "قهوه روبستا",
+    "اسپرسو ساز خانگی",
+    "قهوه ترک",
+    "قهوه دمی",
+    "فرنچ پرس",
+    "کلد برو",
+    "قهوه سبوس‌خورده",
+    "V60",
+    "ایروپرس",
+    "موکاپات",
+    "قهوه تک خاستگاه",
+    "کافئین کم",
 ];
 
 export function Tags() {
     return (
-        <section className="w-full mt-16 bg-white rounded-3xl border border-[#eae5de] shadow-sm">
-            <div className="bg-[#f0f0f0]">
-                <h2 className="text-2xl font-bold text-[#1f1b17] tracking-tight mb-6 p-3 md:p-2">
-                    برچسب ها
+        <section aria-label="برچسب‌ها" className="w-full mt-16 bg-foam rounded-3xl border border-latte shadow-sm overflow-hidden">
+            <div className="bg-espresso">
+                <h2 className="text-lg font-bold text-foam tracking-tight px-6 py-4">
+                    برچسب‌های پرجست‌وجو
                 </h2>
             </div>
 
-            <div className="flex flex-wrap gap-3 p-3 md:p-2">
+            <div className="flex flex-wrap gap-2.5 p-5 md:p-6">
                 {tags.map((tag) => (
                     <button
                         key={tag}
-                        className="px-4 py-2 bg-[#f2efe9] text-[#4b3f34] text-sm rounded-full border border-transparent hover:border-[#d4cbc0] hover:bg-[#e6dfd6] transition-all duration-200 hover:shadow-sm"
+                        className="px-4 py-2 bg-beige text-clay text-sm font-medium rounded-full border border-transparent hover:border-beige-dark hover:bg-beige-dark hover:text-ink transition-all duration-200"
                     >
                         {tag}
                     </button>

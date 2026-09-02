@@ -33,6 +33,8 @@ export type BrewMethod = {
   name: string;
   slug: string;
   image: string;
+  /** Intrinsic pixel width of the image (all brew-method images are 128px tall). */
+  imageWidth: number;
   order: number;
 };
 
@@ -60,6 +62,7 @@ export const BREW_METHODS: BrewMethod[] = [
     name: "V60",
     slug: "v60",
     image: "/media/brew_methods/v60.png",
+    imageWidth: 60,
     order: 0,
   },
   {
@@ -67,6 +70,7 @@ export const BREW_METHODS: BrewMethod[] = [
     name: "اسپرسو خانگی",
     slug: "home-espresso",
     image: "/media/brew_methods/espresso-home.png",
+    imageWidth: 64,
     order: 1,
   },
   {
@@ -74,6 +78,7 @@ export const BREW_METHODS: BrewMethod[] = [
     name: "ایروپرس",
     slug: "aeropress",
     image: "/media/brew_methods/aeropress.png",
+    imageWidth: 51,
     order: 2,
   },
   {
@@ -81,6 +86,7 @@ export const BREW_METHODS: BrewMethod[] = [
     name: "سایفون",
     slug: "siphon",
     image: "/media/brew_methods/siphon.png",
+    imageWidth: 53,
     order: 3,
   },
   {
@@ -88,6 +94,7 @@ export const BREW_METHODS: BrewMethod[] = [
     name: "فرانسه ساز",
     slug: "france-press",
     image: "/media/brew_methods/france-press.png",
+    imageWidth: 103,
     order: 4,
   },
   {
@@ -95,6 +102,7 @@ export const BREW_METHODS: BrewMethod[] = [
     name: "فرنچ پرس",
     slug: "french-press",
     image: "/media/brew_methods/french-press.png",
+    imageWidth: 90,
     order: 5,
   },
   {
@@ -102,6 +110,7 @@ export const BREW_METHODS: BrewMethod[] = [
     name: "کلد برو",
     slug: "cold-brew",
     image: "/media/brew_methods/cold-brew.png",
+    imageWidth: 54,
     order: 6,
   },
   {
@@ -109,6 +118,7 @@ export const BREW_METHODS: BrewMethod[] = [
     name: "کمکس",
     slug: "chemex",
     image: "/media/brew_methods/chemex.png",
+    imageWidth: 88,
     order: 7,
   },
   {
@@ -116,6 +126,7 @@ export const BREW_METHODS: BrewMethod[] = [
     name: "موکاپات قهوه",
     slug: "moka-pot",
     image: "/media/brew_methods/moka-pot.png",
+    imageWidth: 121,
     order: 8,
   },
   {
@@ -123,6 +134,7 @@ export const BREW_METHODS: BrewMethod[] = [
     name: "نانو پرسو",
     slug: "nano-espresso",
     image: "/media/brew_methods/nano-espresso.png",
+    imageWidth: 51,
     order: 9,
   },
   {
@@ -130,6 +142,7 @@ export const BREW_METHODS: BrewMethod[] = [
     name: "نیمه صنعتی",
     slug: "semi-industrial",
     image: "/media/brew_methods/semi-industrial.png",
+    imageWidth: 95,
     order: 10,
   },
 ];

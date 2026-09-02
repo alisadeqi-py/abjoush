@@ -127,21 +127,27 @@ export default function CoffeeWizard({
                 <Image
                     src="/images/barista-speaking.gif"
                     alt=""
-                    className="absolute inset-0 h-full w-full object-cover animate-fade-in"
+                    fill
+                    sizes="100vw"
+                    className="object-cover animate-fade-in"
                 />
             )}
             {overlay === "intro" && (
                 <Image
                     src="/images/overlay-choose-machine.png"
                     alt=""
-                    className="absolute inset-0 h-full w-full object-cover animate-fade-in"
+                    fill
+                    sizes="100vw"
+                    className="object-cover animate-fade-in"
                 />
             )}
             {overlay === "ratio-intro" && (
                 <Image
                     src="/images/overlay-choose-ratio.png"
                     alt=""
-                    className="absolute inset-0 h-full w-full object-cover animate-fade-in"
+                    fill
+                    sizes="100vw"
+                    className="object-cover animate-fade-in"
                 />
             )}
 
@@ -167,13 +173,15 @@ export default function CoffeeWizard({
                                 key={method.id}
                                 onClick={() => handlePickMethod(method)}
                                 className={`flex shrink-0 snap-center flex-col items-center rounded-xl border-[3px] bg-white px-4 py-2 transition ${selectedMethod?.id === method.id
-                                    ? "scale-105 border-coffee-accent"
+                                    ? "scale-105 border-roast"
                                     : "border-transparent"
                                     }`}
                             >
                                 <Image
                                     src={method.image}
                                     alt={method.name}
+                                    width={method.imageWidth}
+                                    height={128}
                                     className="h-16 w-auto object-contain"
                                 />
                                 <h5 className="mt-2 whitespace-nowrap text-center text-xs font-medium">
@@ -192,8 +200,8 @@ export default function CoffeeWizard({
                     style={{ opacity: panelVisible ? 1 : 0 }}
                 >
                     <div className="mb-2 flex items-center justify-around">
-                        <Image src="/images/bean-robusta.png" alt="" className="h-16 w-auto sm:h-20" />
-                        <Image src="/images/bean-arabica.png" alt="" className="h-16 w-auto sm:h-20" />
+                        <Image src="/images/bean-robusta.png" alt="" width={150} height={110} className="h-16 w-auto sm:h-20" />
+                        <Image src="/images/bean-arabica.png" alt="" width={150} height={110} className="h-16 w-auto sm:h-20" />
                     </div>
 
                     <div className="mx-auto mb-2 flex w-fit gap-2 rounded-md bg-white px-3 py-1 text-xs font-semibold">
@@ -205,13 +213,13 @@ export default function CoffeeWizard({
                         <div className="absolute -top-9 right-0 flex gap-2">
                             <button
                                 onClick={goToOrigin}
-                                className="rounded-md border-2 border-coffee-bean px-3 py-1 text-xs font-semibold text-coffee-bean"
+                                className="rounded-md border-2 border-caramel px-3 py-1 text-xs font-semibold text-caramel"
                             >
                                 مرحله بعد
                             </button>
                             <button
                                 onClick={backToMethod}
-                                className="rounded-md border-2 border-coffee-bean px-3 py-1 text-xs font-semibold text-coffee-bean"
+                                className="rounded-md border-2 border-caramel px-3 py-1 text-xs font-semibold text-caramel"
                             >
                                 مرحله قبل
                             </button>
@@ -219,7 +227,7 @@ export default function CoffeeWizard({
 
                         <div className="relative flex w-full items-center justify-center">
                             <div
-                                className="absolute -top-6 -translate-x-1/2 rounded-md bg-coffee-roast px-2 py-1 text-xs text-white"
+                                className="absolute -top-6 -translate-x-1/2 rounded-md bg-roast px-2 py-1 text-xs text-white"
                                 style={{ left: `${robusta}%` }}
                             >
                                 {robusta} % {arabica}
@@ -299,12 +307,14 @@ export default function CoffeeWizard({
                                     key={origin.id}
                                     onMouseEnter={() => setFocusedOriginId(origin.id)}
                                     onClick={() => handlePickOrigin(origin)}
-                                    className={`shrink-0 snap-center overflow-hidden rounded-xl border-[3px] transition ${focusedOriginId === origin.id ? "border-coffee-accent" : "border-transparent"
+                                    className={`shrink-0 snap-center overflow-hidden rounded-xl border-[3px] transition ${focusedOriginId === origin.id ? "border-roast" : "border-transparent"
                                         }`}
                                 >
                                     <Image
                                         src={origin.image}
                                         alt={origin.name}
+                                        width={250}
+                                        height={100}
                                         className="h-24 w-24 object-cover sm:h-28 sm:w-28"
                                     />
                                     <div className="bg-white py-1 text-xs font-semibold">{origin.name}</div>
@@ -336,7 +346,7 @@ export default function CoffeeWizard({
                             </div>
                             <button
                                 onClick={reset}
-                                className="rounded-full bg-coffee-bean px-6 py-2 text-sm font-bold text-white"
+                                className="rounded-full bg-roast px-6 py-2 text-sm font-bold text-white"
                             >
                                 شروع دوباره
                             </button>

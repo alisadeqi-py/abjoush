@@ -1,18 +1,29 @@
 @import "tailwindcss";
 
-:root {
-  --background: 30 20% 96%;
-  --foreground: 24 10% 10%;
-  --border: 30 10% 85%;
-}
+/* ─── Abjoush coffee palette ───────────────────────────────────────────────
+   Single source of truth for brand colors. Tailwind v4 generates utilities
+   (bg-espresso, text-cream, border-latte …) from these tokens.             */
+@theme {
+  /* Brand ramp — warm, roasted, creamy */
+  --color-espresso: #2a1d16;      /* near-black brown — headings, active pills */
+  --color-roast: #5c2501;         /* deep roast — primary accent, footer band  */
+  --color-caramel: #8a5a33;       /* mid accent — links, highlights            */
+  --color-latte: #e7ddd0;         /* borders, dividers                         */
+  --color-cream: #f8f5f0;         /* section panels                            */
+  --color-foam: #fffdf9;          /* cards on cream                            */
+  --color-beige: #f1ece4;         /* subtle chip/button fills                  */
+  --color-beige-dark: #e3dbcf;    /* chip hover                                */
+  --color-clay: #6b6154;          /* secondary text                            */
+  --color-mocha: #8a7d6e;         /* muted text                                */
+  --color-ink: #1f1b17;           /* primary text                              */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-coffee-accent: #5c2501;   /* dark roast brown */
-  --color-coffee-bean: #4b3f34;     /* muted coffee bean */
-  --color-coffee-roast: #5c2501;    /* roast color */
-  --font-sans: var(--font-vazirmatn), system-ui, sans-serif;
+  /* Semantic */
+  --color-nik: #ecfdf5;           /* grade badge: نیک (green tint)   */
+  --color-nik-text: #065f46;
+  --color-motevaset: #fffbeb;     /* grade badge: متوسط (amber tint) */
+  --color-motevaset-text: #92400e;
+
+  /* Motion */
   --animate-fade-in: fade-in 0.5s ease-in-out;
 }
 
@@ -21,34 +32,43 @@
   to { opacity: 1; }
 }
 
-body {
-  background: hsl(var(--background));
-  color: hsl(var(--foreground));
-  font-family: var(--font-sans);
+/* ─── Base ───────────────────────────────────────────────────────────────── */
+:root {
+  --background: #f4efe8;
+  --foreground: var(--color-ink);
 }
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-vazirmatn), system-ui, sans-serif;
+}
+
+/* ─── Utilities ──────────────────────────────────────────────────────────── */
 
 /* Hide scrollbar across browsers while preserving scroll functionality */
 .scrollbar-hidden {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 .scrollbar-hidden::-webkit-scrollbar {
   width: 0;
   height: 0;
 }
 
+/* ─── Components ─────────────────────────────────────────────────────────── */
 @layer components {
+  /* Grade badges (used by ProductCard) */
   .badge-grade-nik {
-    background: #ecfdf5;
-    color: #065f46;
+    background: var(--color-nik);
+    color: var(--color-nik-text);
   }
-
   .badge-grade-motevaset {
-    background: #fffbeb;
-    color: #92400e;
+    background: var(--color-motevaset);
+    color: var(--color-motevaset-text);
   }
 
-  /* CoffeeWizard ratio slider: transparent track, hidden thumb */
+  /* CoffeeWizard ratio slider: minimal thumb over the illustrated track */
   .ratio-range {
     -webkit-appearance: none;
     background: transparent;
@@ -59,22 +79,21 @@ body {
   .ratio-range::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
-    background: #5c2501;
+    background: var(--color-roast);
     cursor: pointer;
     border: 2px solid white;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   }
   .ratio-range::-moz-range-thumb {
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
-    background: #5c2501;
+    background: var(--color-roast);
     cursor: pointer;
     border: 2px solid white;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   }
 }
-

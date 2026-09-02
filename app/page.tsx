@@ -15,7 +15,11 @@ export default function Home() {
       <CoffeeWizard brewMethods={BREW_METHODS} origins={ORIGINS} />
       <div className="w-full max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
         <CategoryFilter />
-        <CoffeeShowcase title="پرفروش ترین ها" subtitle="قهوه‌ای برای هر سلیقه" />
+        <CoffeeShowcase
+          sectionId="products"
+          title="پرفروش ترین ها"
+          subtitle="قهوه‌ای برای هر سلیقه"
+        />
         <CoffeeShowcase title="جدیدترین ها" subtitle="قهوه‌ای برای کشف کردن" />
         <CoffeeShowcase title="پیشنهاد ویژه" subtitle="قهوه‌ای برای علاقه‌مندان" />
         <CoffeeShowcase title="محبوب ترین ها" subtitle="قهوه‌ای برای هر سلیقه" />

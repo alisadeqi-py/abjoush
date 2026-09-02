@@ -24,6 +24,8 @@ const products: (Omit<ProductCardProps, "gradeType"> & {
 export interface CoffeeShowcaseProps {
   title?: string;
   subtitle?: string;
+  /** DOM id for the section, useful for anchor navigation. */
+  sectionId?: string;
   products?: (Omit<ProductCardProps, "gradeType"> & {
     gradeType: "nik" | "motevaset";
     id: number;
@@ -33,6 +35,7 @@ export interface CoffeeShowcaseProps {
 export function CoffeeShowcase({
   title = "پرفروش ترین ها",
   subtitle = "قهوه‌ای برای هر سلیقه",
+  sectionId,
   products: customProducts,
 }: CoffeeShowcaseProps) {
   const items = customProducts ?? products;
@@ -41,21 +44,23 @@ export function CoffeeShowcase({
     scrollRef,
     showLeftFade,
     showRightFade,
+    scrollProgress,
     scrollByAmount,
     onMouseDown,
   } = useHorizontalScroll(PRODUCT_CARD_WIDTH, CARD_GAP);
 
   return (
     <section
+      id={sectionId}
       aria-label={`اسکرول افقی ${title}`}
-      className="w-full relative border border-[#e0dcd6] pb-6 rounded-2xl bg-[#f8f6f3] px-4 md:px-6 lg:px-8 mt-10"
+      className="w-full relative border border-latte rounded-3xl bg-cream shadow-sm px-4 md:px-6 lg:px-8 mt-10"
     >
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold text-[#1f1b17] tracking-tight">
+          <h2 className="text-2xl md:text-3xl font-bold text-ink tracking-tight">
             {title}
           </h2>
-          <p className="text-[#6b6154] text-sm md:text-base mt-1 font-medium">
+          <p className="text-clay text-sm md:text-base mt-1 font-medium">
             {subtitle}
           </p>
         </div>
@@ -71,11 +76,11 @@ export function CoffeeShowcase({
       <div className="relative">
         {/* Left fade */}
         {showLeftFade && (
-          <div className="absolute left-0 top-0 bottom-0 w-12 bg-linear-to-r from-[#f8f6f3] via-[#f8f6f3]/80 to-transparent pointer-events-none z-10" />
+          <div className="absolute left-0 top-0 bottom-0 w-12 bg-linear-to-r from-cream via-cream/80 to-transparent pointer-events-none z-10 rounded-l-3xl" />
         )}
         {/* Right fade */}
         {showRightFade && (
-          <div className="absolute right-0 top-0 bottom-0 w-12 bg-linear-to-l from-[#f8f6f3] via-[#f8f6f3]/80 to-transparent pointer-events-none z-10" />
+          <div className="absolute right-0 top-0 bottom-0 w-12 bg-linear-to-l from-cream via-cream/80 to-transparent pointer-events-none z-10 rounded-r-3xl" />
         )}
 
         <div
@@ -89,11 +94,19 @@ export function CoffeeShowcase({
         </div>
       </div>
 
-      {/* Scroll hint dots */}
-      <div className="flex justify-center gap-1 mt-1">
-        {items.map((_, idx) => (
-          <span key={idx} className="w-1.5 h-1.5 rounded-full bg-[#d4cbc0]" />
-        ))}
+      {/* Live scroll progress (fills as the user scrolls the row) */}
+      <div
+        className="h-1 w-40 mx-auto mt-2 rounded-full bg-latte overflow-hidden"
+        role="progressbar"
+        aria-valuenow={Math.round(scrollProgress * 100)}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={`پیشرفت اسکرول ${title}`}
+      >
+        <div
+          className="h-full rounded-full bg-roast transition-[width] duration-150 ease-out"
+          style={{ width: `${Math.max(6, Math.round(scrollProgress * 100))}%` }}
+        />
       </div>
     </section>
   );

@@ -1,110 +1,102 @@
 export function Footer() {
     return (
-        <footer className="w-full mt-16 bg-white rounded-3xl border border-[#eae5de] shadow-sm">
-            <div className="bg-[#5c2501] p-3 rounded-t-2xl">
-                <h2 className="text-base font-bold text-white tracking-tight">
-                    تماس با ما
-                </h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-6 md:p-8">
-                {/* دریافت یا ثبت / Useful Links */}
-                <div>
-                    <h3 className="text-lg font-bold text-[#1f1b17] mb-4">دریافت یا ثبت</h3>
-                    <h4 className="font-semibold text-[#1f1b17] mb-2 text-sm">لینک های مفید</h4>
-                    <ul className="space-y-2 text-sm">
-                        {[
-                            "جوابگاه دیدنی استان خوزستان",
-                            "جوابگاه دیدنی شهرستان",
-                            "جوابگاه دیدنی مرکزستان",
-                            "جوابگاه دیدنی شمال",
-                            "جوابگاه دیدنی غرب",
-                        ].map((link) => (
-                            <li key={link}>
-                                <a
-                                    href="#"
-                                    className="text-[#6b6154] hover:text-[#1f1b17] transition-colors"
-                                >
-                                    {link}
-                                </a>
-                            </li>
-                        ))}
-                    </ul>
+        <footer className="w-full mt-16 mb-6 px-4 md:px-6 lg:px-8">
+            <div className="max-w-7xl mx-auto bg-foam rounded-3xl border border-latte shadow-sm overflow-hidden">
+                {/* Brand band */}
+                <div className="bg-espresso px-6 py-4 flex items-center justify-between">
+                    <h2 className="text-base font-bold text-foam tracking-tight">
+                        آبجوش
+                    </h2>
+                    <p className="text-xs text-foam/70">قهوه‌ای برای هر سلیقه</p>
                 </div>
 
-                {/* پاسخ ها / Social & Searches */}
-                <div>
-                    <h3 className="text-lg font-bold text-[#1f1b17] mb-4">پاسخ ها</h3>
-                    <div className="space-y-4">
-                        <div>
-                            <p className="font-semibold text-[#1f1b17] text-sm mb-2">
-                                با ما در شبکه‌های اجتماعی همراه شوید
-                            </p>
-                            <div className="flex gap-3">
-                                <a
-                                    href="#"
-                                    className="w-10 h-10 rounded-full bg-[#f2efe9] flex items-center justify-center text-[#4b3f34] hover:bg-[#e6dfd6] transition-colors"
-                                    aria-label="اینستاگرام"
-                                >
-                                    <InstagramIcon className="w-5 h-5" />
-                                </a>
-                                <a
-                                    href="#"
-                                    className="w-10 h-10 rounded-full bg-[#f2efe9] flex items-center justify-center text-[#4b3f34] hover:bg-[#e6dfd6] transition-colors"
-                                    aria-label="تلگرام"
-                                >
-                                    <TelegramIcon className="w-5 h-5" />
-                                </a>
-                                <a
-                                    href="#"
-                                    className="w-10 h-10 rounded-full bg-[#f2efe9] flex items-center justify-center text-[#4b3f34] hover:bg-[#e6dfd6] transition-colors"
-                                    aria-label="واتساپ"
-                                >
-                                    <WhatsAppIcon className="w-5 h-5" />
-                                </a>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 p-6 md:p-8">
+                    {/* Useful links */}
+                    <div>
+                        <h3 className="text-sm font-bold text-ink mb-3">لینک‌های مفید</h3>
+                        <ul className="space-y-2.5 text-sm">
+                            {[
+                                { href: "#products", label: "محصولات" },
+                                { href: "#about", label: "درباره‌ی قهوه" },
+                                { href: "#testimonials", label: "نظرات مشتریان" },
+                                { href: "#faq", label: "سوالات متداول" },
+                            ].map(({ href, label }) => (
+                                <li key={href}>
+                                    <a
+                                        href={href}
+                                        className="text-clay hover:text-roast transition-colors"
+                                    >
+                                        {label}
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    {/* Social + searches */}
+                    <div>
+                        <h3 className="text-sm font-bold text-ink mb-3">ما را دنبال کنید</h3>
+                        <div className="flex gap-2.5">
+                            <a
+                                href="#"
+                                className="w-10 h-10 rounded-full bg-beige flex items-center justify-center text-clay hover:bg-roast hover:text-foam transition-colors"
+                                aria-label="اینستاگرام"
+                            >
+                                <InstagramIcon className="w-5 h-5" />
+                            </a>
+                            <a
+                                href="#"
+                                className="w-10 h-10 rounded-full bg-beige flex items-center justify-center text-clay hover:bg-roast hover:text-foam transition-colors"
+                                aria-label="تلگرام"
+                            >
+                                <TelegramIcon className="w-5 h-5" />
+                            </a>
+                            <a
+                                href="#"
+                                className="w-10 h-10 rounded-full bg-beige flex items-center justify-center text-clay hover:bg-roast hover:text-foam transition-colors"
+                                aria-label="واتساپ"
+                            >
+                                <WhatsAppIcon className="w-5 h-5" />
+                            </a>
+                        </div>
+
+                        <h3 className="text-sm font-bold text-ink mt-6 mb-3">جست‌وجوهای پرطرفدار</h3>
+                        <ul className="space-y-2 text-sm">
+                            {["خرید قهوه عربیکا", "خرید قهوه اسپرسو", "قهوه سبوس‌خورده"].map((search) => (
+                                <li key={search}>
+                                    <a href="#" className="text-clay hover:text-roast transition-colors">
+                                        {search}
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    {/* About */}
+                    <div>
+                        <h3 className="text-sm font-bold text-ink mb-3">درباره‌ی آبجوش</h3>
+                        <p className="text-sm text-clay leading-relaxed">
+                            آبجوش قهوه‌ی تازه‌رست را با درجه‌ی عصاره‌گیری شفاف و روش دم‌آوری
+                            مناسب سلیقه‌ی شما ارائه می‌کند؛ از دانه‌ی تک‌خاستگاه تا ترکیب‌های
+                            خانگی.
+                        </p>
+                        <div className="mt-4 flex gap-6">
+                            <div>
+                                <p className="text-lg font-extrabold text-roast">۱۰+</p>
+                                <p className="text-xs text-clay">روش دم‌آوری</p>
+                            </div>
+                            <div>
+                                <p className="text-lg font-extrabold text-roast">۳</p>
+                                <p className="text-xs text-clay">خاستگاه</p>
                             </div>
                         </div>
-
-                        <div>
-                            <p className="font-semibold text-[#1f1b17] text-sm mb-2">بر سرج ها</p>
-                            <ul className="space-y-2 text-sm">
-                                {[
-                                    "خرید قهوه پوستی",
-                                    "خرید قهوه عربی",
-                                    "خرید قهوه آبی",
-                                ].map((search) => (
-                                    <li key={search}>
-                                        <a
-                                            href="#"
-                                            className="text-[#6b6154] hover:text-[#1f1b17] transition-colors"
-                                        >
-                                            {search}
-                                        </a>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
                     </div>
                 </div>
 
-                {/* Contact Info / About */}
-                <div>
-                    <h3 className="text-lg font-bold text-[#1f1b17] mb-4">درباره ما</h3>
-                    <div className="space-y-3 text-sm text-[#6b6154]">
-                        <p className="leading-relaxed">
-                            کافه آرامش با بیش از ۱۴۵ کافه در ۲۴ شهر ایران، بهترین تجربه قهوه را برای شما فراهم می‌کند.
-                        </p>
-                        <div className="pt-2">
-                            <p className="font-medium text-[#1f1b17]">۱۴۵ کافه</p>
-                            <p className="font-medium text-[#1f1b17]">۲۴ شهر</p>
-                        </div>
-                    </div>
+                {/* Bottom bar */}
+                <div className="border-t border-latte px-6 py-4 text-center text-xs text-mocha">
+                    کلیه حقوق این وب‌سایت متعلق به آبجوش است.
                 </div>
-            </div>
-
-            {/* Footer Bottom */}
-            <div className="mt-8 pt-4 border-t border-[#eae5de] text-center text-xs text-[#8a7d6e]">
-                کلیه حقوق این وبسایت متعلق به کافه آرامش می‌باشد.
             </div>
         </footer>
     );

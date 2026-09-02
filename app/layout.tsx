@@ -22,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fa" dir="rtl">
-      <body className={`${vazirmatn.variable} font-sans antialiased bg-[#fff8f2]`}>
+      <body className={`${vazirmatn.variable} font-sans antialiased bg-cream`}>
         <Header />
         {children}
         <Footer />

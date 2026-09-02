@@ -5,43 +5,49 @@ import { useState } from "react";
 const faqs = [
     {
         id: 1,
-        question: "آیا ایرانی برای گردشگران خارجی مناسب است؟",
+        question: "تفاوت قهوه عربیکا و روبستا چیست؟",
         answer:
-            "بله، ایران با تاریخ غنی، جاذبه‌های طبیعی متنوع و مهمان‌نوازی بی‌نظیر، یکی از بهترین مقاصد گردشگری برای گردشگران خارجی است. بسیاری از گردشگران خارجی هر ساله از ایران دیدن می‌کنند و تجربه‌های مثبتی دارند.",
+            "عربیکا طعمی نرم‌تر، اسیدیته‌ی بالاتر و عطر میوه‌ای دارد و روبستا بدنه‌ای غلیظ‌تر، کافئین بیشتری و تلخی عمیق‌تری دارد. در آبجوش ترکیب این دو دانه را بر اساس سلیقه‌ی شما تنظیم می‌کنیم.",
     },
     {
         id: 2,
-        question: "جاذبه‌های گردشگری ایران کدامند؟",
+        question: "قهوه را چطور نگه داری کنم تا تازگی‌اش حفظ شود؟",
         answer:
-            "ایران دارای جاذبه‌های گردشگری فراوانی است از جمله: تخت جمشید، میدان نقش جهان، بازار تاریخی تبریز، جنگل‌های شمال، کویرهای مرکزی، جزیره کیش، و بسیاری مکان‌های تاریخی و طبیعی دیگر.",
+            "قهوه را در ظرف دربسته، خنک و دور از نور مستقیم نگه دارید. یخچال توصیه نمی‌شود چون رطوبت عطر قهوه را از بین می‌برد. بهترین طعم، دو تا چهار هفته‌ی اول بعد از رست است.",
     },
     {
         id: 3,
-        question: "بهترین زمان ایرانی‌کردی که است؟",
+        question: "برای هر روش دم‌آوری چه آسیابانی مناسبی است؟",
         answer:
-            "بهترین زمان برای سفر به ایران، فصل‌های بهار (فروردین تا خرداد) و پاییز (مهر تا آذر) است. در این فصول، آب و هوا معتدل و دلپذیر بوده و مناظر طبیعی در زیباترین حالت خود قرار دارند.",
+            "اسپرسو آسیاب بسیار ریز می‌خواهد، موکاپات و ایروپرس متوسط، و فرنچ‌پرس یا کلد برو درشت. اگر دانه را به‌صورت سبوس‌خورده سفارش دهید، آسیاب مناسب روش دم‌آوری‌تان برایتان انجام می‌دهیم.",
+    },
+    {
+        id: 4,
+        question: "ارسال چقدر زمان می‌برد؟",
+        answer:
+            "سفارش‌های تهران در بازه‌ی یک روز کاری و شهرستان‌ها بین دو تا چهار روز کاری ارسال می‌شوند. قهوه‌های سبوس‌خورده در روز سفارش رست و بسته‌بندی می‌شوند تا تازه به دستتان برسد.",
     },
 ];
 
 export function FAQ() {
-    const [openIndex, setOpenIndex] = useState<number | null>(null);
+    const [openIndex, setOpenIndex] = useState<number | null>(0);
 
     const toggleFAQ = (index: number) => {
         setOpenIndex(openIndex === index ? null : index);
     };
 
     return (
-        <section className="w-full mt-16 bg-[#fefaf7] rounded-3xl border border-[#eae5de] p-6 md:p-8 shadow-sm">
+        <section id="faq" className="w-full mt-16 bg-cream rounded-3xl border border-latte p-6 md:p-8 shadow-sm scroll-mt-20">
             <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl md:text-3xl font-bold text-[#5c2706] tracking-tight">
+                <h2 className="text-2xl md:text-3xl font-bold text-ink tracking-tight">
                     سوالات متداول
                 </h2>
                 <a
                     href="#"
-                    className="text-sm font-medium text-[#6b6154] hover:text-[#5c2706] transition-colors flex items-center gap-1"
+                    className="text-sm font-medium text-clay hover:text-roast transition-colors flex items-center gap-1"
                 >
                     مشاهده همه
-                    <ArrowIcon className="w-4 h-4" />
+                    <ArrowIcon className="w-4 h-4 rtl:-scale-x-100" />
                 </a>
             </div>
 
@@ -51,28 +57,33 @@ export function FAQ() {
                     return (
                         <div
                             key={faq.id}
-                            className="border border-[#eae5de] rounded-2xl overflow-hidden transition-all duration-200 hover:border-[#d4cbc0]"
+                            className={`border rounded-2xl overflow-hidden transition-colors duration-200 ${
+                                isOpen ? "border-beige-dark bg-foam" : "border-latte hover:border-beige-dark"
+                            }`}
                         >
                             <button
                                 onClick={() => toggleFAQ(index)}
-                                className="w-full px-5 py-4 text-right flex items-center justify-between gap-4 hover:bg-[#faf8f5] transition-colors"
+                                aria-expanded={isOpen}
+                                className="w-full px-5 py-4 text-right flex items-center justify-between gap-4 transition-colors"
                             >
-                                <span className="text-sm md:text-base font-medium text-[#5c2706] flex-1">
+                                <span className="text-sm md:text-base font-semibold text-ink flex-1">
                                     {faq.question}
                                 </span>
                                 <span
-                                    className={`w-6 h-6 rounded-full bg-[#f2efe9] flex items-center justify-center text-[#4b3f34] transition-transform duration-300 flex-shrink-0 ${isOpen ? "rotate-180" : ""
-                                        }`}
+                                    className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
+                                        isOpen ? "bg-roast text-foam rotate-180" : "bg-beige text-clay"
+                                    }`}
                                 >
                                     <ChevronDownIcon className="w-4 h-4" />
                                 </span>
                             </button>
 
                             <div
-                                className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-96" : "max-h-0"
-                                    }`}
+                                className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                                    isOpen ? "max-h-96" : "max-h-0"
+                                }`}
                             >
-                                <div className="px-5 pb-4 text-sm text-[#6b6154] leading-relaxed border-t border-[#eae5de] pt-3">
+                                <div className="px-5 pb-4 text-sm md:text-[0.95rem] text-clay leading-relaxed border-t border-latte/70 pt-3">
                                     {faq.answer}
                                 </div>
                             </div>

@@ -4,6 +4,8 @@ export interface UseHorizontalScrollResult {
   scrollRef: React.RefObject<HTMLDivElement | null>;
   showLeftFade: boolean;
   showRightFade: boolean;
+  /** 0–1 fraction of horizontal scroll progress (0 = start, 1 = end). */
+  scrollProgress: number;
   scrollByAmount: (direction: "left" | "right") => void;
   cardWidthWithGap: number;
   onMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void;
@@ -20,6 +22,7 @@ export function useHorizontalScroll(cardWidth: number, gap: number): UseHorizont
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showLeftFade, setShowLeftFade] = useState(false);
   const [showRightFade, setShowRightFade] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const isDragging = useRef(false);
   const startX = useRef(0);
   const startScrollLeft = useRef(0);
@@ -32,6 +35,8 @@ export function useHorizontalScroll(cardWidth: number, gap: number): UseHorizont
     const { scrollLeft, scrollWidth, clientWidth } = el;
     setShowLeftFade(scrollLeft > 10);
     setShowRightFade(scrollLeft < scrollWidth - clientWidth - 10);
+    const maxScroll = scrollWidth - clientWidth;
+    setScrollProgress(maxScroll > 0 ? Math.min(1, Math.max(0, Math.abs(scrollLeft) / maxScroll)) : 0);
   }, []);
 
   const scrollByAmount = useCallback((direction: "left" | "right") => {
@@ -115,6 +120,7 @@ export function useHorizontalScroll(cardWidth: number, gap: number): UseHorizont
     scrollRef,
     showLeftFade,
     showRightFade,
+    scrollProgress,
     scrollByAmount,
     cardWidthWithGap,
     onMouseDown: handleMouseDown,

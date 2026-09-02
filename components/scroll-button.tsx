@@ -1,4 +1,3 @@
-// components/scroll-button.tsx
 "use client";
 
 interface ScrollButtonProps {
@@ -8,17 +7,16 @@ interface ScrollButtonProps {
 
 export function ScrollButton({ direction, onClick }: ScrollButtonProps) {
   const isLeft = direction === "left";
-  // In RTL, "right" means scroll forward (to the left visually)
-  // but we keep it intuitive
 
   return (
     <button
       onClick={onClick}
-      className="w-8 h-8 rounded-full bg-white border border-[#eae5de] 
-                 flex items-center justify-center text-[#5f5548]
-                 hover:bg-[#f2efe9] hover:border-[#d4cbc0] 
+      className="w-9 h-9 rounded-full bg-foam border border-latte
+                 flex items-center justify-center text-clay
+                 hover:bg-espresso hover:border-espresso hover:text-foam
+                 active:scale-95
                  transition-all duration-200 shadow-sm
-                 focus:outline-none focus:ring-2 focus:ring-[#d4cbc0] focus:ring-offset-1"
+                 focus:outline-none focus-visible:ring-2 focus-visible:ring-caramel"
       aria-label={isLeft ? "اسکرول به چپ" : "اسکرول به راست"}
     >
       {isLeft ? (
@@ -32,6 +30,7 @@ export function ScrollButton({ direction, onClick }: ScrollButtonProps) {
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
+          aria-hidden
         >
           <path d="m15 18-6-6 6-6" />
         </svg>
@@ -46,6 +45,7 @@ export function ScrollButton({ direction, onClick }: ScrollButtonProps) {
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
+          aria-hidden
         >
           <path d="m9 18 6-6-6-6" />
         </svg>
