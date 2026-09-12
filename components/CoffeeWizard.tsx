@@ -24,6 +24,19 @@ const STEPS: Array<{ id: Exclude<Stage, "hero">; label: string }> = [
     { id: "summary", label: "نتیجه" },
 ];
 
+/**
+ * Shared zoom for every layer of the scene. All stage assets (hero bg,
+ * barista gif, both narration overlays) are painted on one 2837×1195 canvas,
+ * so they must be scaled as a group — zooming only the background would tear
+ * the composition apart.
+ *
+ * On a portrait phone a 2.37:1 asset inside a ~0.5 aspect box letterboxes to
+ * roughly 20% of the available height. A full fill would need ~4.7× and crop
+ * ~79% of the width, so we stop at 1.9× and bias the origin upward to keep
+ * the barista's face in frame.
+ */
+const SCENE_ZOOM = "origin-[50%_38%] scale-[1.9] sm:scale-[1.35] lg:scale-100";
+
 function playNarration(src: string, muted: boolean) {
     // Mirrors the original theme's `new Audio(url).play()` — a fresh Audio
     // instance per cue, fire-and-forget. Swallow rejections: browsers block
@@ -50,6 +63,43 @@ export default function CoffeeWizard({
     const [selectedOrigin, setSelectedOrigin] = useState<Origin | null>(null);
     const [muted, setMuted] = useState(false);
 
+    /* ------------------------------------------------------------------ *
+     * Background video
+     * ------------------------------------------------------------------ */
+
+    const videoRef = useRef<HTMLVideoElement>(null);
+
+    /**
+     * `muted` gates the narration Audio, but a <video> has its own mute
+     * state. Keep them in sync — otherwise the sound toggle appears dead
+     * while the loop keeps playing.
+     */
+    useEffect(() => {
+        if (videoRef.current) videoRef.current.muted = muted;
+    }, [muted]);
+
+    /**
+     * iOS refuses to autoplay anything with sound, and some Android builds
+     * pause a backgrounded video. Nudge it back on mount / visibility.
+     */
+    useEffect(() => {
+        const v = videoRef.current;
+        if (!v) return;
+
+        v.muted = muted;
+        v.play().catch(() => { });
+
+        const onVisible = () => {
+            if (document.visibilityState === "visible") v.play().catch(() => { });
+        };
+        document.addEventListener("visibilitychange", onVisible);
+        return () => document.removeEventListener("visibilitychange", onVisible);
+    }, [muted]);
+
+    /* ------------------------------------------------------------------ *
+     * Timers
+     * ------------------------------------------------------------------ */
+
     const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
     const after = (ms: number, fn: () => void) => {
         timers.current.push(setTimeout(fn, ms));
@@ -59,6 +109,10 @@ export default function CoffeeWizard({
     const arabica = 100 - robusta;
     const focusedOrigin = origins.find((o) => o.id === focusedOriginId) ?? origins[0] ?? null;
     const currentStepIndex = STEPS.findIndex((s) => s.id === stage);
+
+    /* ------------------------------------------------------------------ *
+     * Wizard actions
+     * ------------------------------------------------------------------ */
 
     function handleStart() {
         setOverlay("intro");
@@ -129,57 +183,94 @@ export default function CoffeeWizard({
         setFocusedOriginId(origins[0]?.id ?? null);
     }
 
+    /* ------------------------------------------------------------------ *
+     * Render
+     * ------------------------------------------------------------------ */
+
     return (
         <section
             aria-label="ویزارد ساخت قهوه"
             className="relative w-full overflow-hidden bg-black h-[calc(100dvh-4rem)]"
         >
-            {/* Background.
-                All four stage assets share one 2837×1195 (~2.37:1) canvas, so
-                `object-contain` letterboxes them identically on any viewport —
-                the full composition (barista, captions) always stays visible.
-                `object-cover` would crop the sides away on 16:9 and destroy
-                the scene on portrait phones. */}
-            <Image
-                src="/images/hero-bg.jpg"
-                alt=""
-                fill
-                priority
-                sizes="100vw"
-                className="object-contain"
-            />
+            {/*
+             * SCENE LAYER — every background asset lives inside this single
+             * zoomed wrapper so the group scales as one composition.
+             *
+             *   • `absolute inset-0` gives the `fill` images a positioned
+             *     parent.
+             *   • SCENE_ZOOM is the mobile zoom; it resets to 100% at lg.
+             *   • `overflow-hidden` clips the overhang so the scale never
+             *     creates scrollbars.
+             */}
+            <div className={`absolute inset-0 overflow-hidden ${SCENE_ZOOM}`}>
+                {/*
+                 * VIDEO BACKGROUND
+                 *
+                 * Required mobile attributes:
+                 *   playsInline — without it iOS Safari hijacks the video
+                 *                 into the native fullscreen player.
+                 *   muted       — mandatory for autoplay; synced to the
+                 *                 sound toggle via useEffect.
+                 *   loop        — seamless background.
+                 *   preload     — "metadata" keeps the initial payload small.
+                 *   poster      — first paint, before the first frame decodes.
+                 *
+                 * `<source media>` is evaluated once at load, not on
+                 * resize/rotate. For true responsiveness use matchMedia + a
+                 * `src` swap instead.
+                 */}
+                <video
+                    ref={videoRef}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                    poster="/images/hero-bg.jpg"
+                    aria-hidden="true"
+                    className="absolute inset-0 h-full w-full object-contain"
+                >
+                    <source
+                        src="/videos/hero-mobile.mp4"
+                        media="(max-width: 767px)"
+                        type="video/mp4"
+                    />
+                    <source src="/videos/hero.mp4" type="video/mp4" />
+                </video>
 
-            {/* Speaking-barista overlay, shown during the two narrated intros.
-                `unoptimized`: keep the GIF's animation intact in production —
-                the image optimizer can re-encode it to a static frame. */}
-            {overlay !== "none" && (
-                <Image
-                    src="/images/barista-speaking.gif"
-                    alt=""
-                    fill
-                    sizes="100vw"
-                    unoptimized
-                    className="object-contain animate-fade-in"
-                />
-            )}
-            {overlay === "intro" && (
-                <Image
-                    src="/images/overlay-choose-machine.png"
-                    alt=""
-                    fill
-                    sizes="100vw"
-                    className="object-contain animate-fade-in"
-                />
-            )}
-            {overlay === "ratio-intro" && (
-                <Image
-                    src="/images/overlay-choose-ratio.png"
-                    alt=""
-                    fill
-                    sizes="100vw"
-                    className="object-contain animate-fade-in"
-                />
-            )}
+                {/* Speaking-barista overlay, shown during the two narrated
+                    intros. `unoptimized`: keep the GIF's animation intact in
+                    production — the optimizer can re-encode it to a static
+                    frame. */}
+                {overlay !== "none" && (
+                    <Image
+                        src="/images/barista-speaking.gif"
+                        alt=""
+                        fill
+                        sizes="100vw"
+                        unoptimized
+                        className="object-contain animate-fade-in"
+                    />
+                )}
+                {overlay === "intro" && (
+                    <Image
+                        src="/images/overlay-choose-machine.png"
+                        alt=""
+                        fill
+                        sizes="100vw"
+                        className="object-contain animate-fade-in"
+                    />
+                )}
+                {overlay === "ratio-intro" && (
+                    <Image
+                        src="/images/overlay-choose-ratio.png"
+                        alt=""
+                        fill
+                        sizes="100vw"
+                        className="object-contain animate-fade-in"
+                    />
+                )}
+            </div>
 
             {/* Skip narration — the overlays block interaction for seconds;
                 nobody should be forced to re-listen on a second visit. */}
@@ -193,8 +284,9 @@ export default function CoffeeWizard({
                 </button>
             )}
 
-            {/* Sound toggle — narration is autoplayed audio; muting must be
-                one tap, not a browser setting. */}
+            {/* Sound toggle — narration is autoplayed audio and the loop has
+                its own mute state; muting must be one tap, not a browser
+                setting. */}
             <button
                 type="button"
                 onClick={() => setMuted((m) => !m)}
@@ -215,27 +307,22 @@ export default function CoffeeWizard({
                         const done = i < currentStepIndex;
                         const current = i === currentStepIndex;
                         return (
-                            <li
-                                key={step.id}
-                                aria-current={current ? "step" : undefined}
-                            >
+                            <li key={step.id} aria-current={current ? "step" : undefined}>
                                 <span
-                                    className={`flex items-center gap-1.5 rounded-full px-2 py-1 text-[0.7rem] font-semibold transition-colors ${
-                                        current
+                                    className={`flex items-center gap-1.5 rounded-full px-2 py-1 text-[0.7rem] font-semibold transition-colors ${current
                                             ? "bg-roast text-white"
                                             : done
-                                              ? "text-caramel"
-                                              : "text-mocha"
-                                    }`}
+                                                ? "text-caramel"
+                                                : "text-mocha"
+                                        }`}
                                 >
                                     <span
-                                        className={`grid h-4 w-4 place-items-center rounded-full text-[0.6rem] font-bold ${
-                                            current
+                                        className={`grid h-4 w-4 place-items-center rounded-full text-[0.6rem] font-bold ${current
                                                 ? "bg-white text-roast"
                                                 : done
-                                                  ? "bg-caramel text-white"
-                                                  : "bg-beige text-mocha"
-                                        }`}
+                                                    ? "bg-caramel text-white"
+                                                    : "bg-beige text-mocha"
+                                            }`}
                                     >
                                         {done ? "✓" : i + 1}
                                     </span>
@@ -276,11 +363,10 @@ export default function CoffeeWizard({
                                 type="button"
                                 onClick={() => handlePickMethod(method)}
                                 aria-pressed={selectedMethod?.id === method.id}
-                                className={`flex shrink-0 snap-center flex-col items-center rounded-xl border-[3px] bg-white px-4 py-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caramel hover:-translate-y-0.5 hover:shadow-md ${
-                                    selectedMethod?.id === method.id
+                                className={`flex shrink-0 snap-center flex-col items-center rounded-xl border-[3px] bg-white px-4 py-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caramel hover:-translate-y-0.5 hover:shadow-md ${selectedMethod?.id === method.id
                                         ? "scale-105 border-roast"
                                         : "border-transparent"
-                                }`}
+                                    }`}
                             >
                                 <Image
                                     src={method.image}
@@ -439,9 +525,8 @@ export default function CoffeeWizard({
                                     onFocus={() => setFocusedOriginId(origin.id)}
                                     onClick={() => handlePickOrigin(origin)}
                                     aria-pressed={selectedOrigin?.id === origin.id}
-                                    className={`shrink-0 snap-center overflow-hidden rounded-xl border-[3px] bg-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${
-                                        focusedOriginId === origin.id ? "border-roast" : "border-transparent"
-                                    }`}
+                                    className={`shrink-0 snap-center overflow-hidden rounded-xl border-[3px] bg-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${focusedOriginId === origin.id ? "border-roast" : "border-transparent"
+                                        }`}
                                 >
                                     <Image
                                         src={origin.image}
