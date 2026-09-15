@@ -4,6 +4,8 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 import { RatingKey, type BrewMethod, type Origin, originDisplay } from "@/lib/content";
+import { CoffeeCupIcon } from "./icon/CoffeeCupIcon";
+import { ChevronIcon } from "./icon/ChevronIcon";
 
 type Stage = "hero" | "method" | "ratio" | "origin" | "summary";
 type Overlay = "none" | "intro" | "ratio-intro";
@@ -310,18 +312,18 @@ export default function CoffeeWizard({
                             <li key={step.id} aria-current={current ? "step" : undefined}>
                                 <span
                                     className={`flex items-center gap-1.5 rounded-full px-2 py-1 text-[0.7rem] font-semibold transition-colors ${current
-                                            ? "bg-roast text-white"
-                                            : done
-                                                ? "text-caramel"
-                                                : "text-mocha"
+                                        ? "bg-roast text-white"
+                                        : done
+                                            ? "text-caramel"
+                                            : "text-mocha"
                                         }`}
                                 >
                                     <span
                                         className={`grid h-4 w-4 place-items-center rounded-full text-[0.6rem] font-bold ${current
-                                                ? "bg-white text-roast"
-                                                : done
-                                                    ? "bg-caramel text-white"
-                                                    : "bg-beige text-mocha"
+                                            ? "bg-white text-roast"
+                                            : done
+                                                ? "bg-caramel text-white"
+                                                : "bg-beige text-mocha"
                                             }`}
                                     >
                                         {done ? "✓" : i + 1}
@@ -336,13 +338,39 @@ export default function CoffeeWizard({
 
             {/* Hero CTA */}
             {stage === "hero" && (
-                <button
-                    type="button"
-                    onClick={handleStart}
-                    className="absolute bottom-[23vh] left-1/2 z-10 -translate-x-1/2 rounded-full bg-white px-6 py-3 text-sm font-bold text-black shadow-lg transition hover:scale-105 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/50 active:scale-100"
-                >
-                    شروع کن قهوه بساز
-                </button>
+                <div className="absolute self-center bottom-10 z-10 flex flex-col items-center backdrop-blur-xs rounded-lg px-4 p-3 text-center">
+                    {/* Headline */}
+                    <h2 className="mb-2 text-lg font-extrabold leading-snug text-white sm:text-xl">
+                        قهوه اختصاصی تو، تجربه‌ای خاص برای تو
+                    </h2>
+
+                    {/* Subtitle */}
+                    <p className="mb-5 max-w-xs text-xs leading-relaxed sm:text-sm text-caramel">
+                        از انتخاب دانه تا آماده‌سرایی، همه چیز با سلیقه تو
+                    </p>
+
+                    {/* Primary CTA */}
+                    <button
+                        type="button"
+                        onClick={handleStart}
+                        className="group flex w-full max-w-xs items-center justify-center gap-2 rounded-full bg-[#f5efe6] px-6 py-3 text-sm font-bold text-ink shadow-lg transition hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/50 active:scale-100"
+                    >
+                        <CoffeeCupIcon className="h-5 w-5 text-caramel transition group-hover:scale-110" />
+                        <span>شروع سفارش</span>
+                    </button>
+
+                    {/* Secondary link */}
+                    <button
+                        type="button"
+                        onClick={handleStart}
+                        className="mt-4 flex items-center gap-2 text-[0.7rem] font-medium text-white/85 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 sm:text-xs"
+                    >
+                        <span className="text-caramel">چطور قهوه اختصاصی من ساخته می‌شود</span>
+                        <span className="grid h-5 w-5 place-items-center rounded-full border border-text-caramel text-caramel">
+                            <ChevronIcon className="h-3 w-3" />
+                        </span>
+                    </button>
+                </div>
             )}
 
             {/* Brew-method carousel */}
@@ -364,8 +392,8 @@ export default function CoffeeWizard({
                                 onClick={() => handlePickMethod(method)}
                                 aria-pressed={selectedMethod?.id === method.id}
                                 className={`flex shrink-0 snap-center flex-col items-center rounded-xl border-[3px] bg-white px-4 py-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caramel hover:-translate-y-0.5 hover:shadow-md ${selectedMethod?.id === method.id
-                                        ? "scale-105 border-roast"
-                                        : "border-transparent"
+                                    ? "scale-105 border-roast"
+                                    : "border-transparent"
                                     }`}
                             >
                                 <Image
