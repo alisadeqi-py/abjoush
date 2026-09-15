@@ -338,7 +338,7 @@ export default function CoffeeWizard({
 
             {/* Hero CTA */}
             {stage === "hero" && (
-                <div className="absolute self-center bottom-10 z-10 flex flex-col items-center backdrop-blur-xs rounded-lg px-4 p-3 text-center">
+                <div className="absolute justify-self-center bottom-10 z-10 flex flex-col items-center backdrop-blur-xs rounded-lg px-4 p-3 text-center">
                     {/* Headline */}
                     <h2 className="mb-2 text-lg font-extrabold leading-snug text-white sm:text-xl">
                         قهوه اختصاصی تو، تجربه‌ای خاص برای تو
@@ -376,7 +376,7 @@ export default function CoffeeWizard({
             {/* Brew-method carousel */}
             {stage === "method" && (
                 <div
-                    className="absolute bottom-[4%] left-1/2 z-10 w-full max-w-[92%] -translate-x-1/2 transition-opacity duration-500 sm:max-w-[44rem]"
+                    className="absolute bottom-[4%] left-1/2 z-10 w-full max-w-[92%] -translate-x-1/2 transition-opacity duration-500 sm:max-w-176"
                     style={{ opacity: panelVisible ? 1 : 0 }}
                 >
                     <div
