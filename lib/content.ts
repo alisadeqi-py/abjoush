@@ -15,27 +15,20 @@
 
 export type RatingLevel = "low" | "medium" | "good" | "high";
 
-export type RatingKey = "acidity" | "body" | "sweetness" | "aroma" | "bitterness";
-
-/** Get display value for a rating key on an Origin. */
-export function originDisplay(origin: Origin, key: RatingKey): string {
-  switch (key) {
-    case "acidity": return origin.acidity_display;
-    case "body": return origin.body_display;
-    case "sweetness": return origin.sweetness_display;
-    case "aroma": return origin.aroma_display;
-    case "bitterness": return origin.bitterness_display;
-  }
-}
+export type RatingKey =
+  | "acidity"
+  | "body"
+  | "sweetness"
+  | "aroma"
+  | "bitterness";
 
 export type BrewMethod = {
   id: number;
   name: string;
   slug: string;
   image: string;
-  /** Intrinsic pixel width of the image (all brew-method images are 128px tall). */
-  imageWidth: number;
   order: number;
+  description: string;
 };
 
 export type Origin = {
@@ -54,6 +47,12 @@ export type Origin = {
   aroma_display: string;
   bitterness: RatingLevel;
   bitterness_display: string;
+  /** Country flag shown on the origin card, e.g. "/media/flags/colombia.png". */
+  flag?: string;
+  /** Short tasting-note blurb, may contain a newline. */
+  tasting?: string;
+  /** Brew-method icons this origin is well-suited to. */
+  suitableForIcons?: string[];
 };
 
 export const BREW_METHODS: BrewMethod[] = [
@@ -62,97 +61,105 @@ export const BREW_METHODS: BrewMethod[] = [
     name: "V60",
     slug: "v60",
     image: "/media/brew_methods/v60.png",
-    imageWidth: 60,
     order: 0,
+    description: "A classic pour-over brewing method.",
   },
   {
     id: 2,
     name: "اسپرسو خانگی",
     slug: "home-espresso",
     image: "/media/brew_methods/espresso-home.png",
-    imageWidth: 64,
     order: 1,
+    description: "A home espresso brewing method for rich coffee.",
   },
   {
     id: 3,
     name: "ایروپرس",
     slug: "aeropress",
     image: "/media/brew_methods/aeropress.png",
-    imageWidth: 51,
     order: 2,
+    description: "A versatile brewing method using air pressure.",
   },
   {
     id: 4,
     name: "سایفون",
     slug: "siphon",
     image: "/media/brew_methods/siphon.png",
-    imageWidth: 53,
     order: 3,
+    description: "A visually engaging brewing method using vacuum pressure.",
   },
   {
     id: 5,
     name: "فرانسه ساز",
     slug: "france-press",
     image: "/media/brew_methods/france-press.png",
-    imageWidth: 103,
     order: 4,
+    description: "A French press brewing method for full-bodied coffee.",
   },
   {
     id: 6,
     name: "فرنچ پرس",
     slug: "french-press",
     image: "/media/brew_methods/french-press.png",
-    imageWidth: 90,
     order: 5,
+    description: "A French press brewing method for full-bodied coffee.",
   },
   {
     id: 7,
     name: "کلد برو",
     slug: "cold-brew",
     image: "/media/brew_methods/cold-brew.png",
-    imageWidth: 54,
     order: 6,
+    description: "A French press brewing method for full-bodied coffee.",
   },
   {
     id: 8,
     name: "کمکس",
     slug: "chemex",
     image: "/media/brew_methods/chemex.png",
-    imageWidth: 88,
     order: 7,
+    description: "A French press brewing method for full-bodied coffee.",
   },
   {
     id: 9,
     name: "موکاپات قهوه",
     slug: "moka-pot",
     image: "/media/brew_methods/moka-pot.png",
-    imageWidth: 121,
     order: 8,
+    description: "A French press brewing method for full-bodied coffee.",
   },
   {
     id: 10,
     name: "نانو پرسو",
     slug: "nano-espresso",
     image: "/media/brew_methods/nano-espresso.png",
-    imageWidth: 51,
     order: 9,
+    description: "A French press brewing method for full-bodied coffee.",
   },
   {
     id: 11,
     name: "نیمه صنعتی",
     slug: "semi-industrial",
     image: "/media/brew_methods/semi-industrial.png",
-    imageWidth: 95,
     order: 10,
+    description: "A French press brewing method for full-bodied coffee.",
   },
 ];
 
 export const ORIGINS: Origin[] = [
   {
     id: 1,
-    name: "کنیا",
+    name: "برزیل",
     slug: "kenya",
     image: "/media/origins/kenya.jpg",
+    flag: "/media/flags/kenya.png",
+    tasting: "میوه‌ای، اسیدی\nو پرحسم",
+    suitableForIcons: [
+      "/media/icons/espresso.svg",
+      "/media/icons/filter.svg",
+      "/media/icons/pour-over.svg",
+      "/media/icons/cold-brew.svg",
+    ],
     order: 0,
     acidity: "high",
     acidity_display: "زیاد",
@@ -170,6 +177,14 @@ export const ORIGINS: Origin[] = [
     name: "کلمبیا",
     slug: "colombia",
     image: "/media/origins/colombia.jpg",
+    flag: "/media/flags/colombia.png",
+    tasting: "معتدل، شکلاتی\nو شیرین",
+    suitableForIcons: [
+      "/media/icons/espresso.svg",
+      "/media/icons/milk.svg",
+      "/media/icons/filter.svg",
+      "/media/icons/cold-brew.svg",
+    ],
     order: 1,
     acidity: "medium",
     acidity_display: "متوسط",
@@ -187,6 +202,13 @@ export const ORIGINS: Origin[] = [
     name: "پرو",
     slug: "peru",
     image: "/media/origins/peru.jpg",
+    flag: "/media/flags/peru.png",
+    tasting: "ملایم، آجیلی\nو متعادل",
+    suitableForIcons: [
+      "/media/icons/milk.svg",
+      "/media/icons/filter.svg",
+      "/media/icons/pour-over.svg",
+    ],
     order: 2,
     acidity: "low",
     acidity_display: "کم",
@@ -198,5 +220,29 @@ export const ORIGINS: Origin[] = [
     aroma_display: "متوسط",
     bitterness: "medium",
     bitterness_display: "متوسط",
+  },
+  {
+    id: 4,
+    name: "اتیوپی",
+    slug: "ethiopia",
+    image: "/media/origins/ethiopia.jpg",
+    flag: "/media/flags/ethiopia.png",
+    tasting: "گلی، مرکباتی\nو روشن",
+    suitableForIcons: [
+      "/media/icons/filter.svg",
+      "/media/icons/pour-over.svg",
+      "/media/icons/cold-brew.svg",
+    ],
+    order: 3,
+    acidity: "high",
+    acidity_display: "زیاد",
+    body: "low",
+    body_display: "کم",
+    sweetness: "good",
+    sweetness_display: "خوب",
+    aroma: "high",
+    aroma_display: "زیاد",
+    bitterness: "low",
+    bitterness_display: "کم",
   },
 ];

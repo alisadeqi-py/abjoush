@@ -3,100 +3,45 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
-import { RatingKey, type BrewMethod, type Origin, originDisplay } from "@/lib/content";
+import { type BrewMethod, type Origin } from "@/lib/content";
 import { CoffeeCupIcon } from "./icon/CoffeeCupIcon";
 import { ChevronIcon } from "./icon/ChevronIcon";
+import StageCheckout from "./StageCheckout";
+import StageConsumption, { CONSUMPTION_OPTIONS } from "./StageConsumption";
+import StageFinal from "./StageFinal";
+import StageMethod from "./StageMethod";
+import StageOrigin from "./StageOrigin";
+import StageRatio from "./StageRatio";
+import StageTaste, { TASTE_OPTIONS } from "./StageTaste";
 
-type Stage = "hero" | "method" | "ratio" | "origin" | "summary";
-type Overlay = "none" | "intro" | "ratio-intro";
-
-const RATING_LABELS: Array<[RatingKey, string]> = [
-    ["acidity", "اسیدیته"],
-    ["body", "بادی"],
-    ["sweetness", "شیرینی"],
-    ["aroma", "آروما"],
-    ["bitterness", "تلخی"],
+const STEPS: Array<{ id: number; label: string }> = [
+    { id: 1, label: "انتخاب دستگاه" },
+    { id: 2, label: "ترکیب عربیکا و روبوستا" },
+    { id: 3, label: "انتخاب خاستگاه" },
+    { id: 4, label: "سلیقه و طعم" },
+    { id: 5, label: "میزان مصرف" },
+    { id: 6, label: "پیشنهاد نهایی" },
 ];
 
-/** Wizard steps, shown in the top progress indicator. */
-const STEPS: Array<{ id: Exclude<Stage, "hero">; label: string }> = [
-    { id: "method", label: "روش دم‌آوری" },
-    { id: "ratio", label: "نسبت دانه" },
-    { id: "origin", label: "خاستگاه" },
-    { id: "summary", label: "نتیجه" },
-];
-
-/**
- * Shared zoom for every layer of the scene. All stage assets (hero bg,
- * barista gif, both narration overlays) are painted on one 2837×1195 canvas,
- * so they must be scaled as a group — zooming only the background would tear
- * the composition apart.
- *
- * On a portrait phone a 2.37:1 asset inside a ~0.5 aspect box letterboxes to
- * roughly 20% of the available height. A full fill would need ~4.7× and crop
- * ~79% of the width, so we stop at 1.9× and bias the origin upward to keep
- * the barista's face in frame.
- */
 const SCENE_ZOOM = "origin-[50%_38%] scale-[1.9] sm:scale-[1.35] lg:scale-100";
 
 function playNarration(src: string, muted: boolean) {
-    // Mirrors the original theme's `new Audio(url).play()` — a fresh Audio
-    // instance per cue, fire-and-forget. Swallow rejections: browsers block
-    // autoplay-with-sound until the user has interacted with the page, which
-    // is already guaranteed here since every call sits behind a click.
     if (muted) return;
     const audio = new Audio(src);
     audio.play().catch(() => { });
 }
 
-export default function CoffeeWizard({
-    brewMethods,
-    origins,
-}: {
-    brewMethods: BrewMethod[];
-    origins: Origin[];
-}) {
-    const [stage, setStage] = useState<Stage>("hero");
-    const [overlay, setOverlay] = useState<Overlay>("none");
-    const [panelVisible, setPanelVisible] = useState(false);
+export default function CoffeeWizard() {
+    const [stage, setStage] = useState<number>(0);
     const [selectedMethod, setSelectedMethod] = useState<BrewMethod | null>(null);
-    const [robusta, setRobusta] = useState(50);
-    const [focusedOriginId, setFocusedOriginId] = useState<number | null>(origins[0]?.id ?? null);
     const [selectedOrigin, setSelectedOrigin] = useState<Origin | null>(null);
+    const [selectedTasteId, setSelectedTasteId] = useState<number | null>(null);
+    const [selectedConsumptionId, setSelectedConsumptionId] =
+        useState<number | null>(null);
+
+    const [robusta, setRobusta] = useState(50);
     const [muted, setMuted] = useState(false);
-
-    /* ------------------------------------------------------------------ *
-     * Background video
-     * ------------------------------------------------------------------ */
-
-    const videoRef = useRef<HTMLVideoElement>(null);
-
-    /**
-     * `muted` gates the narration Audio, but a <video> has its own mute
-     * state. Keep them in sync — otherwise the sound toggle appears dead
-     * while the loop keeps playing.
-     */
-    useEffect(() => {
-        if (videoRef.current) videoRef.current.muted = muted;
-    }, [muted]);
-
-    /**
-     * iOS refuses to autoplay anything with sound, and some Android builds
-     * pause a backgrounded video. Nudge it back on mount / visibility.
-     */
-    useEffect(() => {
-        const v = videoRef.current;
-        if (!v) return;
-
-        v.muted = muted;
-        v.play().catch(() => { });
-
-        const onVisible = () => {
-            if (document.visibilityState === "visible") v.play().catch(() => { });
-        };
-        document.addEventListener("visibilitychange", onVisible);
-        return () => document.removeEventListener("visibilitychange", onVisible);
-    }, [muted]);
+    const [startSpeaking, setStartSpeaking] = useState(false);
 
     /* ------------------------------------------------------------------ *
      * Timers
@@ -109,142 +54,72 @@ export default function CoffeeWizard({
     useEffect(() => () => timers.current.forEach(clearTimeout), []);
 
     const arabica = 100 - robusta;
-    const focusedOrigin = origins.find((o) => o.id === focusedOriginId) ?? origins[0] ?? null;
     const currentStepIndex = STEPS.findIndex((s) => s.id === stage);
+    const selectedTasteLabel = TASTE_OPTIONS.find(
+        (t) => t.id === selectedTasteId
+    )?.name;
+    const selectedConsumptionRange = CONSUMPTION_OPTIONS.find(
+        (c) => c.id === selectedConsumptionId
+    )?.range;
 
     /* ------------------------------------------------------------------ *
      * Wizard actions
      * ------------------------------------------------------------------ */
 
     function handleStart() {
-        setOverlay("intro");
         playNarration("/audio/narration-step1.mp3", muted);
-        after(4200, () => setOverlay((cur) => (cur === "intro" ? "none" : cur)));
-        setStage("method");
-        setPanelVisible(false);
-        after(2000, () => setPanelVisible(true));
-    }
-
-    function handlePickMethod(method: BrewMethod) {
-        setSelectedMethod(method);
-        setOverlay("none");
-        after(500, () => {
-            playNarration("/audio/narration-step2.mp3", muted);
-            setStage("ratio");
-            setPanelVisible(false);
-            after(10, () => setPanelVisible(true));
-            setOverlay("ratio-intro");
-            after(5650, () => setOverlay((cur) => (cur === "ratio-intro" ? "none" : cur)));
+        setStartSpeaking(true);
+        after(2000, () => {
+            setStage(1);
+        });
+        after(4200, () => {
+            setStartSpeaking(false);
         });
     }
 
-    /** Let the user bypass a narration overlay immediately. Pending timers
-        no-op afterwards: the overlay timer checks its current value, and the
-        panel timer only ever sets `panelVisible` to true. */
-    function skipOverlay() {
-        setOverlay("none");
-        setPanelVisible(true);
+    function goToNext() {
+        if (stage === 1) {
+            after(500, () => {
+                setStartSpeaking(true);
+                playNarration("/audio/narration-step2.mp3", muted);
+                setStage(2);
+                after(5650, () => setStartSpeaking(false));
+            });
+            return;
+        }
+        if (stage === 6) {
+            setStage(7);
+            return;
+        }
+        if (stage < 1 || stage > 6) return;
+        setStage(stage + 1);
     }
 
-    function goToOrigin() {
-        setOverlay("none");
-        setStage("origin");
-        setPanelVisible(false);
-        after(10, () => setPanelVisible(true));
+    function goToPrevious() {
+        if (stage === 7) {
+            setStage(6);
+            return;
+        }
+        if (stage > 1) {
+            setStage(stage - 1);
+        }
     }
-
-    function backToMethod() {
-        setOverlay("none");
-        setStage("method");
-        setSelectedMethod(null);
-        setPanelVisible(true);
-    }
-
-    function backToRatio() {
-        setOverlay("none");
-        setStage("ratio");
-        setPanelVisible(true);
-    }
-
-    function handlePickOrigin(origin: Origin) {
-        setOverlay("none");
-        setFocusedOriginId(origin.id);
-        setSelectedOrigin(origin);
-        setStage("summary");
-    }
-
-    function reset() {
-        timers.current.forEach(clearTimeout);
-        timers.current = [];
-        setStage("hero");
-        setOverlay("none");
-        setPanelVisible(false);
-        setSelectedMethod(null);
-        setSelectedOrigin(null);
-        setRobusta(50);
-        setFocusedOriginId(origins[0]?.id ?? null);
-    }
-
-    /* ------------------------------------------------------------------ *
-     * Render
-     * ------------------------------------------------------------------ */
 
     return (
         <section
-            aria-label="ویزارد ساخت قهوه"
+            aria-label="ویزارت ساخت قهوه"
             className="relative w-full overflow-hidden bg-black h-[calc(100dvh-4rem)]"
         >
-            {/*
-             * SCENE LAYER — every background asset lives inside this single
-             * zoomed wrapper so the group scales as one composition.
-             *
-             *   • `absolute inset-0` gives the `fill` images a positioned
-             *     parent.
-             *   • SCENE_ZOOM is the mobile zoom; it resets to 100% at lg.
-             *   • `overflow-hidden` clips the overhang so the scale never
-             *     creates scrollbars.
-             */}
             <div className={`absolute inset-0 overflow-hidden ${SCENE_ZOOM}`}>
-                {/*
-                 * VIDEO BACKGROUND
-                 *
-                 * Required mobile attributes:
-                 *   playsInline — without it iOS Safari hijacks the video
-                 *                 into the native fullscreen player.
-                 *   muted       — mandatory for autoplay; synced to the
-                 *                 sound toggle via useEffect.
-                 *   loop        — seamless background.
-                 *   preload     — "metadata" keeps the initial payload small.
-                 *   poster      — first paint, before the first frame decodes.
-                 *
-                 * `<source media>` is evaluated once at load, not on
-                 * resize/rotate. For true responsiveness use matchMedia + a
-                 * `src` swap instead.
-                 */}
-                <video
-                    ref={videoRef}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    preload="metadata"
-                    poster="/images/hero-bg.jpg"
-                    aria-hidden="true"
-                    className="absolute inset-0 h-full w-full object-contain"
-                >
-                    <source
-                        src="/videos/hero-mobile.mp4"
-                        media="(max-width: 767px)"
-                        type="video/mp4"
-                    />
-                    <source src="/videos/hero.mp4" type="video/mp4" />
-                </video>
+                <Image
+                    src="/images/hero-bg.webp"
+                    fill
+                    alt="Background image for the hero section of the coffee wizard"
+                    className="md:object-contain object-cover"
+                    loading="eager"
+                />
 
-                {/* Speaking-barista overlay, shown during the two narrated
-                    intros. `unoptimized`: keep the GIF's animation intact in
-                    production — the optimizer can re-encode it to a static
-                    frame. */}
-                {overlay !== "none" && (
+                {startSpeaking && (
                     <Image
                         src="/images/barista-speaking.gif"
                         alt=""
@@ -254,41 +129,25 @@ export default function CoffeeWizard({
                         className="object-contain animate-fade-in"
                     />
                 )}
-                {overlay === "intro" && (
+                {stage === 1 && (
                     <Image
                         src="/images/overlay-choose-machine.png"
                         alt=""
                         fill
                         sizes="100vw"
-                        className="object-contain animate-fade-in"
+                        className="object-contain animate-fade-in md:flex hidden"
                     />
                 )}
-                {overlay === "ratio-intro" && (
+                {stage === 2 && (
                     <Image
                         src="/images/overlay-choose-ratio.png"
                         alt=""
                         fill
                         sizes="100vw"
-                        className="object-contain animate-fade-in"
+                        className="object-contain animate-fade-in md:flex hidden"
                     />
                 )}
             </div>
-
-            {/* Skip narration — the overlays block interaction for seconds;
-                nobody should be forced to re-listen on a second visit. */}
-            {overlay !== "none" && (
-                <button
-                    type="button"
-                    onClick={skipOverlay}
-                    className="absolute bottom-5 left-1/2 z-20 -translate-x-1/2 rounded-full bg-white/90 px-4 py-1.5 text-xs font-bold text-ink shadow-lg backdrop-blur transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caramel"
-                >
-                    رد کردن و ادامه
-                </button>
-            )}
-
-            {/* Sound toggle — narration is autoplayed audio and the loop has
-                its own mute state; muting must be one tap, not a browser
-                setting. */}
             <button
                 type="button"
                 onClick={() => setMuted((m) => !m)}
@@ -299,45 +158,48 @@ export default function CoffeeWizard({
                 {muted ? <SpeakerOffIcon className="h-4 w-4" /> : <SpeakerIcon className="h-4 w-4" />}
             </button>
 
-            {/* Step indicator — four unmarked stages gave no sense of place. */}
-            {stage !== "hero" && (
-                <ol
-                    aria-label="مراحل ساخت قهوه"
-                    className="absolute top-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-0.5 rounded-full bg-white/85 p-1 shadow backdrop-blur sm:gap-1"
-                >
-                    {STEPS.map((step, i) => {
-                        const done = i < currentStepIndex;
-                        const current = i === currentStepIndex;
-                        return (
-                            <li key={step.id} aria-current={current ? "step" : undefined}>
-                                <span
-                                    className={`flex items-center gap-1.5 rounded-full px-2 py-1 text-[0.7rem] font-semibold transition-colors ${current
-                                        ? "bg-roast text-white"
-                                        : done
-                                            ? "text-caramel"
-                                            : "text-mocha"
-                                        }`}
+            {stage !== 0 && stage !== 7 && (
+                <div className="absolute flex justify-self-center top-10 z-10 transition-opacity duration-500 bg-black lg:w-2xl w-auto rounded-b-lg">
+                    <ol aria-label="مراحل ساخت قهوه" className="flex items-start justify-between gap-1 w-full">
+                        {STEPS.map((step, i) => {
+                            const active = currentStepIndex === i;
+                            return (
+                                <li
+                                    key={step.id}
+                                    className="relative flex flex-1 flex-col items-center"
+                                    aria-current={active ? "step" : undefined}
                                 >
+                                    {i < STEPS.length - 1 && (
+                                        <span
+                                            aria-hidden
+                                            className={`absolute right-1/2 top-4.5 h-px w-full ${active ? "bg-caramel/60" : "bg-white/20"
+                                                }`}
+                                        />
+                                    )}
+
                                     <span
-                                        className={`grid h-4 w-4 place-items-center rounded-full text-[0.6rem] font-bold ${current
-                                            ? "bg-white text-roast"
-                                            : done
-                                                ? "bg-caramel text-white"
-                                                : "bg-beige text-mocha"
+                                        className={`relative grid h-9 w-9 place-items-center rounded-full border-2 text-sm font-bold backdrop-blur-sm transition ${active
+                                            ? "border-caramel bg-caramel/15 text-caramel"
+                                            : "border-white/40 bg-black/40 text-white/70"
                                             }`}
                                     >
-                                        {done ? "✓" : i + 1}
+                                        {step.id}
                                     </span>
-                                    <span className="hidden sm:inline">{step.label}</span>
-                                </span>
-                            </li>
-                        );
-                    })}
-                </ol>
+
+                                    <span
+                                        className={`mt-1.5 max-w-18 text-center text-[0.6rem] leading-tight sm:text-[0.7rem] ${active ? "font-bold text-caramel" : "font-medium text-white/70"
+                                            }`}
+                                    >
+                                        {step.label}
+                                    </span>
+                                </li>
+                            );
+                        })}
+                    </ol>
+                </div>
             )}
 
-            {/* Hero CTA */}
-            {stage === "hero" && (
+            {stage === 0 && (
                 <div className="absolute justify-self-center bottom-10 z-10 flex flex-col items-center backdrop-blur-xs rounded-lg px-4 p-3 text-center">
                     {/* Headline */}
                     <h2 className="mb-2 text-lg font-extrabold leading-snug text-white sm:text-xl">
@@ -373,234 +235,94 @@ export default function CoffeeWizard({
                 </div>
             )}
 
-            {/* Brew-method carousel */}
-            {stage === "method" && (
-                <div
-                    className="absolute bottom-[4%] left-1/2 z-10 w-full max-w-[92%] -translate-x-1/2 transition-opacity duration-500 sm:max-w-176"
-                    style={{ opacity: panelVisible ? 1 : 0 }}
-                >
-                    <div
-                        dir="rtl"
-                        role="group"
-                        aria-label="روش دم‌آوری را انتخاب کنید"
-                        className="flex gap-3 overflow-auto pb-2 scrollbar-hidden flex-nowrap"
+            {/* Step 1 — Brew-method carousel */}
+            {stage === 1 && (
+                <StageMethod selectedMethod={selectedMethod} onSelectMethod={setSelectedMethod} />
+            )}
+
+            {/* Step 2 — Arabica/Robusta ratio */}
+            {stage === 2 && (
+                <StageRatio
+                    robusta={robusta}
+                    arabica={arabica}
+                    setRobusta={setRobusta}
+                    selectedMethod={selectedMethod}
+                    setStage={setStage}
+                />
+            )}
+
+            {/* Step 3 — Arabica origin */}
+            {stage === 3 && (
+                <StageOrigin selectedOrigin={selectedOrigin} onSelectOrigin={setSelectedOrigin} />
+            )}
+
+            {/* Step 4 — Taste */}
+            {stage === 4 && (
+                <StageTaste
+                    robusta={robusta}
+                    arabica={arabica}
+                    selectedMethod={selectedMethod}
+                    selectedTasteId={selectedTasteId}
+                    onSelectTaste={setSelectedTasteId}
+                    onEditDevice={() => setStage(1)}
+                />
+            )}
+
+            {/* Step 5 — Consumption */}
+            {stage === 5 && (
+                <StageConsumption
+                    selectedConsumptionId={selectedConsumptionId}
+                    onSelectConsumption={setSelectedConsumptionId}
+                />
+            )}
+
+            {/* Step 6 — Final suggestion */}
+            {stage === 6 && (
+                <StageFinal
+                    selectedMethod={selectedMethod}
+                    selectedOrigin={selectedOrigin}
+                    robusta={robusta}
+                    arabica={arabica}
+                    selectedTasteLabel={selectedTasteLabel}
+                    selectedConsumptionRange={selectedConsumptionRange}
+                    onEditDevice={() => setStage(1)}
+                    onEditOrigin={() => setStage(3)}
+                    onEditTaste={() => setStage(4)}
+                    onEditConsumption={() => setStage(5)}
+                    onContinue={() => setStage(7)}
+                />
+            )}
+
+            {/* Step 7 — Checkout */}
+            {stage === 7 && (
+                <StageCheckout
+                    selectedMethod={selectedMethod}
+                    selectedOrigin={selectedOrigin}
+                    robusta={robusta}
+                    arabica={arabica}
+                    selectedTasteLabel={selectedTasteLabel}
+                    selectedConsumptionRange={selectedConsumptionRange}
+                    onClose={() => setStage(6)}
+                />
+            )}
+
+            {stage >= 1 && stage <= 5 && (
+                <div className="mb-4 flex items-center justify-between gap-2 absolute bottom-0 left-1/2 z-10 w-full max-w-[92%] -translate-x-1/2 transition-opacity duration-500 sm:max-w-176">
+                    <button
+                        type="button"
+                        onClick={goToNext}
+                        className="rounded-full bg-roast px-4 py-1.5 text-xs font-bold text-white shadow-sm transition hover:bg-espresso focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caramel"
                     >
-                        {brewMethods.map((method) => (
-                            <button
-                                key={method.id}
-                                type="button"
-                                onClick={() => handlePickMethod(method)}
-                                aria-pressed={selectedMethod?.id === method.id}
-                                className={`flex shrink-0 snap-center flex-col items-center rounded-xl border-[3px] bg-white px-4 py-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caramel hover:-translate-y-0.5 hover:shadow-md ${selectedMethod?.id === method.id
-                                    ? "scale-105 border-roast"
-                                    : "border-transparent"
-                                    }`}
-                            >
-                                <Image
-                                    src={method.image}
-                                    alt={method.name}
-                                    width={method.imageWidth}
-                                    height={128}
-                                    className="h-16 w-auto object-contain"
-                                />
-                                {/* span, not h5: headings inside buttons
-                                    confuse the screen-reader outline */}
-                                <span className="mt-2 whitespace-nowrap text-center text-xs font-medium">
-                                    {method.name}
-                                </span>
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {/* Robusta / Arabica ratio step */}
-            {stage === "ratio" && (
-                <div
-                    className="absolute bottom-[4%] left-1/2 z-10 w-full max-w-[92%] -translate-x-1/2 transition-opacity duration-500 sm:max-w-[44rem]"
-                    style={{ opacity: panelVisible ? 1 : 0 }}
-                >
-                    <div className="mb-2 flex items-center justify-around">
-                        <Image src="/images/bean-robusta.png" alt="" width={150} height={110} className="h-16 w-auto sm:h-20" />
-                        <Image src="/images/bean-arabica.png" alt="" width={150} height={110} className="h-16 w-auto sm:h-20" />
-                    </div>
-
-                    <div className="mx-auto mb-2 flex w-fit gap-2 rounded-md bg-white px-3 py-1 text-xs font-semibold">
-                        <span>{robusta} درصد روبستا</span>
-                        <span>{arabica} درصد عربیکا</span>
-                    </div>
-
-                    <div className="rounded-3xl bg-white px-6 py-5">
-                        {/* Nav lives inside the panel: the old absolute -top-9
-                            row collided with the chip above on small screens,
-                            and the primary action is now visually primary. */}
-                        <div className="mb-4 flex items-center justify-between gap-2">
-                            <button
-                                type="button"
-                                onClick={goToOrigin}
-                                className="rounded-full bg-roast px-4 py-1.5 text-xs font-bold text-white shadow-sm transition hover:bg-espresso focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caramel"
-                            >
-                                مرحله بعد
-                            </button>
-                            <button
-                                type="button"
-                                onClick={backToMethod}
-                                className="rounded-full border-2 border-caramel px-4 py-1 text-xs font-semibold text-caramel transition hover:bg-beige focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caramel"
-                            >
-                                مرحله قبل
-                            </button>
-                        </div>
-
-                        <div className="relative flex w-full items-center justify-center">
-                            <div
-                                className="absolute -top-6 -translate-x-1/2 rounded-md bg-roast px-2 py-1 text-xs text-white"
-                                style={{ left: `${robusta}%` }}
-                            >
-                                {robusta} % {arabica}
-                            </div>
-                            <div className="mb-1 flex w-full justify-between text-xs font-extrabold">
-                                <span style={{ opacity: robusta <= 20 ? 0.1 : robusta < 45 ? 0.5 : 1 }}>
-                                    روبستا
-                                </span>
-                                <span style={{ opacity: robusta >= 80 ? 0.1 : robusta > 55 ? 0.5 : 1 }}>
-                                    عربیکا
-                                </span>
-                            </div>
-                            {/* dir="ltr": the page is RTL, so an unmarked range
-                                renders min-on-the-right while the tooltip uses
-                                `left` — the badge slid opposite to the thumb.
-                                Forcing LTR makes 0% = left = عربیکا end, which
-                                is exactly how the two labels sit. */}
-                            <input
-                                type="range"
-                                dir="ltr"
-                                min={0}
-                                max={100}
-                                step={10}
-                                value={robusta}
-                                onChange={(e) => setRobusta(Number(e.target.value))}
-                                aria-label="نسبت روبستا به عربیکا"
-                                aria-valuetext={`${robusta} درصد روبستا، ${arabica} درصد عربیکا`}
-                                className="ratio-range absolute top-3 w-full"
-                            />
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Arabica-origin step */}
-            {(stage === "origin" || stage === "summary") && (
-                <div
-                    className="absolute bottom-[4%] left-1/2 z-10 w-full max-w-[92%] -translate-x-1/2 transition-opacity duration-500 sm:max-w-[700px]"
-                    style={{ opacity: panelVisible || stage === "summary" ? 1 : 0 }}
-                >
-                    {stage === "origin" && focusedOrigin && (
-                        <div className="mb-2 overflow-x-auto">
-                            <table
-                                aria-label="ویژگی‌های قهوه خاستگاه انتخاب‌شده"
-                                className="mx-auto min-w-full table-fixed overflow-hidden rounded-2xl border-2 border-latte bg-foam text-center text-xs"
-                            >
-                                <thead>
-                                    <tr className="bg-beige">
-                                        {RATING_LABELS.map(([, label]) => (
-                                            <th key={label} className="border border-latte px-2 py-1 font-bold text-ink">
-                                                {label}
-                                            </th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        {RATING_LABELS.map(([key]) => (
-                                            <td key={String(key)} className="border border-latte px-2 py-1 text-clay">
-                                                {focusedOrigin ? originDisplay(focusedOrigin, key) : ""}
-                                            </td>
-                                        ))}
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-
-                    {stage === "origin" && (
-                        <div className="mb-2 flex items-center justify-between gap-2">
-                            <button
-                                type="button"
-                                onClick={backToRatio}
-                                className="rounded-full border-2 border-white px-3 py-1 text-xs font-semibold text-white transition hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                            >
-                                مرحله قبل
-                            </button>
-                            <h4 className="rounded-xl bg-black/40 px-3 py-1.5 text-sm font-bold text-white backdrop-blur-sm sm:text-base">
-                                کشور محل کشت قهوه عربیکا خود را انتخاب نمایید
-                            </h4>
-                            <span className="w-[60px]" aria-hidden />
-                        </div>
-                    )}
-
-                    {stage === "origin" && (
-                        <div
-                            dir="rtl"
-                            role="group"
-                            aria-label="خاستگاه عربیکا را انتخاب کنید"
-                            className="flex justify-center gap-3 overflow-auto pb-2 scrollbar-hidden flex-nowrap"
-                        >
-                            {origins.map((origin) => (
-                                <button
-                                    key={origin.id}
-                                    type="button"
-                                    onMouseEnter={() => setFocusedOriginId(origin.id)}
-                                    onFocus={() => setFocusedOriginId(origin.id)}
-                                    onClick={() => handlePickOrigin(origin)}
-                                    aria-pressed={selectedOrigin?.id === origin.id}
-                                    className={`shrink-0 snap-center overflow-hidden rounded-xl border-[3px] bg-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${focusedOriginId === origin.id ? "border-roast" : "border-transparent"
-                                        }`}
-                                >
-                                    <Image
-                                        src={origin.image}
-                                        alt={origin.name}
-                                        width={250}
-                                        height={100}
-                                        className="h-24 w-24 object-cover sm:h-28 sm:w-28"
-                                    />
-                                    <div className="py-1 text-xs font-semibold text-ink">{origin.name}</div>
-                                </button>
-                            ))}
-                        </div>
-                    )}
-
-                    {stage === "summary" && selectedOrigin && (
-                        <div className="rounded-3xl bg-white p-5 text-center shadow-lg">
-                            <h4 className="mb-3 text-base font-bold text-ink">قهوه‌ی شما آماده شد</h4>
-                            <ul className="mb-4 space-y-1 text-sm text-clay">
-                                <li>
-                                    روش دم‌آوری: <b className="text-ink">{selectedMethod?.name}</b>
-                                </li>
-                                <li>
-                                    نسبت دانه: <b className="text-ink">{robusta}% روبستا / {arabica}% عربیکا</b>
-                                </li>
-                                <li>
-                                    مبدا عربیکا: <b className="text-ink">{selectedOrigin.name}</b>
-                                </li>
-                            </ul>
-                            {/* flex-wrap instead of grid-cols-2: five chips in
-                                a 2-col grid left a dangling odd cell */}
-                            <div className="mx-auto mb-4 flex max-w-sm flex-wrap justify-center gap-2 text-xs">
-                                {RATING_LABELS.map(([key, label]) => (
-                                    <div key={String(key)} className="rounded-full bg-beige px-3 py-1 text-clay">
-                                        {label}: <b className="text-ink">{selectedOrigin ? originDisplay(selectedOrigin, key) : ""}</b>
-                                    </div>
-                                ))}
-                            </div>
-                            <button
-                                type="button"
-                                onClick={reset}
-                                className="rounded-full bg-roast px-6 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-espresso focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caramel"
-                            >
-                                شروع دوباره
-                            </button>
-                        </div>
-                    )}
+                        مرحله بعد
+                    </button>
+                    <button
+                        type="button"
+                        disabled={stage === 1}
+                        onClick={goToPrevious}
+                        className="rounded-full border-2 border-caramel px-4 py-1 text-xs font-semibold text-caramel transition hover:bg-beige focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caramel disabled:cursor-not-allowed disabled:opacity-30"
+                    >
+                        مرحله قبل
+                    </button>
                 </div>
             )}
         </section>
