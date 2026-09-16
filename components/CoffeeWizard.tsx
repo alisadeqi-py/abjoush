@@ -23,7 +23,6 @@ const STEPS: Array<{ id: number; label: string }> = [
     { id: 6, label: "پیشنهاد نهایی" },
 ];
 
-const SCENE_ZOOM = "origin-[50%_38%] scale-[1.9] sm:scale-[1.35] lg:scale-100";
 
 function playNarration(src: string, muted: boolean, start: boolean) {
     if (start) return
@@ -111,12 +110,12 @@ export default function CoffeeWizard() {
             aria-label="ویزارت ساخت قهوه"
             className="relative w-full overflow-hidden bg-black h-[calc(100dvh-4rem)]"
         >
-            <div className={`absolute inset-0 overflow-hidden ${SCENE_ZOOM}`}>
+            <div className={`absolute inset-0 overflow-hidden origin-[50%_38%] scale-[1.9] sm:scale-[1.35] lg:scale-100`}>
                 <Image
                     src="/images/hero-bg.webp"
                     fill
                     alt="Background image for the hero section of the coffee wizard"
-                    className="md:object-contain object-cover"
+                    className="md:object-contain object-cover md:pb-0 pb-100"
                     loading="eager"
                 />
 
@@ -127,7 +126,7 @@ export default function CoffeeWizard() {
                         fill
                         sizes="100vw"
                         unoptimized
-                        className="md:object-contain object-cover animate-fade-in"
+                        className="md:object-contain object-cover animate-fade-in md:pb-0 pb-100"
                     />
                 )}
                 {stage === 1 && (
@@ -160,7 +159,7 @@ export default function CoffeeWizard() {
             </button>
 
             {stage !== 0 && stage !== 7 && (
-                <div className="absolute flex justify-self-center top-10 z-10 transition-opacity duration-500 bg-black lg:w-2xl w-auto rounded-b-lg">
+                <div className="absolute flex justify-self-center md:top-10 top-0 z-10 transition-opacity duration-500 bg-black lg:w-2xl w-auto rounded-b-lg ">
                     <ol aria-label="مراحل ساخت قهوه" className="flex items-start justify-between gap-1 w-full">
                         {STEPS.map((step, i) => {
                             const active = currentStepIndex === i;
@@ -177,7 +176,6 @@ export default function CoffeeWizard() {
                                                 }`}
                                         />
                                     )}
-
                                     <span
                                         className={`relative grid h-9 w-9 place-items-center rounded-full border-2 text-sm font-bold backdrop-blur-sm transition ${active
                                             ? "border-caramel bg-caramel/15 text-caramel"

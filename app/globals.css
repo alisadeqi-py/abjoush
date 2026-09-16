@@ -109,3 +109,56 @@ body {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   }
 }
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Improve range slider touch behavior */
+.ratio-range {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  touch-action: pan-y; /* Allows vertical scrolling while dragging horizontally */
+}
+
+.ratio-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 24px;
+  width: 24px;
+  border-radius: 50%;
+  background: #c49a6c; /* Your caramel color */
+  border: 3px solid white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  margin-top: -10px; /* Adjust based on track height */
+}
+
+.ratio-range::-moz-range-thumb {
+  height: 24px;
+  width: 24px;
+  border-radius: 50%;
+  background: #c49a6c;
+  border: 3px solid white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.ratio-range::-webkit-slider-runnable-track {
+  height: 4px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 2px;
+}
+
+.ratio-range::-moz-range-track {
+  height: 4px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 2px;
+}
