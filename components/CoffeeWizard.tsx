@@ -25,14 +25,15 @@ const STEPS: Array<{ id: number; label: string }> = [
 
 const SCENE_ZOOM = "origin-[50%_38%] scale-[1.9] sm:scale-[1.35] lg:scale-100";
 
-function playNarration(src: string, muted: boolean) {
+function playNarration(src: string, muted: boolean, start: boolean) {
+    if (start) return
     if (muted) return;
     const audio = new Audio(src);
     audio.play().catch(() => { });
 }
 
 export default function CoffeeWizard() {
-    const [stage, setStage] = useState<number>(0);
+    const [stage, setStage] = useState<number>(6);
     const [selectedMethod, setSelectedMethod] = useState<BrewMethod | null>(null);
     const [selectedOrigin, setSelectedOrigin] = useState<Origin | null>(null);
     const [selectedTasteId, setSelectedTasteId] = useState<number | null>(null);
@@ -67,7 +68,7 @@ export default function CoffeeWizard() {
      * ------------------------------------------------------------------ */
 
     function handleStart() {
-        playNarration("/audio/narration-step1.mp3", muted);
+        playNarration("/audio/narration-step1.mp3", muted, startSpeaking);
         setStartSpeaking(true);
         after(2000, () => {
             setStage(1);
@@ -81,7 +82,7 @@ export default function CoffeeWizard() {
         if (stage === 1) {
             after(500, () => {
                 setStartSpeaking(true);
-                playNarration("/audio/narration-step2.mp3", muted);
+                playNarration("/audio/narration-step2.mp3", muted, startSpeaking);
                 setStage(2);
                 after(5650, () => setStartSpeaking(false));
             });
@@ -126,7 +127,7 @@ export default function CoffeeWizard() {
                         fill
                         sizes="100vw"
                         unoptimized
-                        className="object-contain animate-fade-in"
+                        className="md:object-contain object-cover animate-fade-in"
                     />
                 )}
                 {stage === 1 && (
