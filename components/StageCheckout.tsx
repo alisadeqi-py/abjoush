@@ -145,15 +145,15 @@ export default function StageCheckout({
             setSubmitting(false);
         }
     }
-
+    
     return (
         <section
             aria-label="تکمیل سفارش"
-            className="absolute inset-x-0 bottom-0 z-10 flex justify-center px-3 pb-4 sm:px-6 sm:pb-6"
+            className="absolute lg:top-auto top-5 inset-x-0 bottom-0 z-10 flex justify-center px-3 pb-4 sm:px-6 sm:pb-6 md:h-full h-auto"
         >
-            <div className="w-full max-w-5xl overflow-hidden rounded-3xl border border-black/5 bg-[#fbf7ef] shadow-2xl ring-1 ring-black/5">
+            <div className="w-full max-w-5xl rounded-3xl border border-black/5 bg-[#fbf7ef] shadow-2xl ring-1 ring-black/5 overflow-scroll md:overflow-hidden lg:m-0 mb-5">
                 {/* ═══ Top bar ═══════════════════════════════════════ */}
-                <header className="relative flex items-center justify-between gap-3 border-b border-black/5 bg-gradient-to-l from-[#1a1512] to-[#2b201a] px-4 py-3 text-white sm:px-6 sm:py-4">
+                <header className="relative flex items-center justify-between gap-3 border-b border-black/5 bg-linear-to-l from-[#1a1512] to-[#2b201a] px-4 py-3 text-white sm:px-6 sm:py-4">
                     <div className="flex items-center gap-3">
                         <span className="grid h-10 w-10 place-items-center rounded-2xl bg-caramel/15 ring-1 ring-caramel/30">
                             <Image

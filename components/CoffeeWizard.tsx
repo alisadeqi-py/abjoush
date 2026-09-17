@@ -110,7 +110,7 @@ export default function CoffeeWizard() {
             aria-label="ویزارت ساخت قهوه"
             className="relative w-full overflow-hidden bg-black h-[calc(100dvh-4rem)]"
         >
-            <div className={`absolute inset-0 overflow-hidden origin-[50%_38%] scale-[1.9] sm:scale-[1.35] lg:scale-100`}>
+            <div className={`absolute inset-0 overflow-hidden origin-[50%_5%] scale-[2] sm:scale-[1.35] lg:scale-100`}>
                 <Image
                     src="/images/hero-bg.webp"
                     fill
@@ -159,7 +159,7 @@ export default function CoffeeWizard() {
             </button>
 
             {stage !== 0 && stage !== 7 && (
-                <div className="absolute flex justify-self-center md:top-10 top-0 z-10 transition-opacity duration-500 bg-black lg:w-2xl w-auto rounded-b-lg ">
+                <div className="absolute flex justify-self-center md:top-10 top-1 z-10 transition-opacity duration-500 bg-black lg:w-2xl w-auto rounded-b-lg ">
                     <ol aria-label="مراحل ساخت قهوه" className="flex items-start justify-between gap-1 w-full">
                         {STEPS.map((step, i) => {
                             const active = currentStepIndex === i;

@@ -70,7 +70,7 @@ export default function StageTaste({
                 {/* Selected device */}
 
                 {/* Advisor note */}
-                <div className="w-full max-w-40 rounded-3xl bg-[#1a1512] p-4 text-white shadow-lg">
+                <div className="w-full max-w-40 rounded-3xl bg-[#1a1512] p-4 text-white shadow-lg hidden md:grid">
                     <h4 className="mb-1 text-sm font-bold text-caramel">
                         راهنما
                     </h4>
@@ -80,7 +80,7 @@ export default function StageTaste({
                     </p>
                 </div>
 
-                <div className="w-full max-w-xs rounded-3xl bg-[#1a1512] p-4 text-center shadow-lg">
+                <div className="w-full max-w-xs rounded-3xl bg-[#1a1512] p-4 text-center shadow-lg hidden md:grid">
                     <p className="mb-3 text-xs font-semibold text-amber-100">
                         خاستگاه انتخاب شده
                     </p>

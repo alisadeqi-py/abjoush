@@ -112,7 +112,7 @@ export default function StageConsumption({
     return (
         <div className="absolute bottom-[4%] left-1/2 z-10 w-full max-w-[92%] -translate-x-1/2 transition-opacity duration-500 sm:max-w-175">
             {/* ── Info card ─────────────────────────────────────────── */}
-            <div className="mx-auto mb-3 w-full max-w-64 rounded-3xl bg-[#1a1512] p-4 text-white shadow-lg">
+            <div className="mx-auto mb-3 w-full max-w-64 rounded-3xl bg-[#1a1512] p-4 text-white shadow-lg hidden md:grid">
                 <h4 className="mb-1 text-sm font-bold text-caramel">
                     چرا این مرحله مهم است؟
                 </h4>
