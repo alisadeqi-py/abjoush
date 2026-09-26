@@ -11,6 +11,39 @@ interface StageRatioProps {
     setStage: (stage: number) => void;
 }
 
+/* ------------------------------------------------------------------ *
+ * Ratio marker labels — declared OUTSIDE the component
+ * ------------------------------------------------------------------ */
+const RATIO_MARKERS = [
+    { value: "100%", sub: "روبستا" },
+    { value: "75/25", sub: "" },
+    { value: "50/50", sub: "" },
+    { value: "25/75", sub: "" },
+    { value: "100%", sub: "عربیکا" },
+];
+
+function RatioLabels({ small = false }: { small?: boolean }) {
+    return (
+        <div
+            className={`mt-4 flex w-full justify-between ${small ? "text-[9px]" : "text-[10px]"
+                } font-medium text-caramel/80`}
+            dir="rtl"
+        >
+            {RATIO_MARKERS.map((m, i) => (
+                <div key={i} className="flex flex-col items-center leading-tight">
+                    <span>{m.value}</span>
+                    {m.sub && (
+                        <span className="mt-0.5 text-caramel/60">{m.sub}</span>
+                    )}
+                </div>
+            ))}
+        </div>
+    );
+}
+
+/* ------------------------------------------------------------------ *
+ * Main component
+ * ------------------------------------------------------------------ */
 export default function StageRatio({
     robusta,
     arabica,
@@ -18,19 +51,17 @@ export default function StageRatio({
     selectedMethod,
     setStage,
 }: StageRatioProps) {
-    // 1. Proper mobile detection to avoid hydration mismatch
     const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
-        checkMobile(); // Check on mount
+        checkMobile();
         window.addEventListener("resize", checkMobile);
         return () => window.removeEventListener("resize", checkMobile);
     }, []);
 
     const renderMobile = (
         <div className="absolute bottom-0 left-0 w-full z-10 flex flex-col gap-3 px-3 pb-[calc(1rem+env(safe-area-inset-bottom))] max-h-[75vh] overflow-y-auto hide-scrollbar">
-            {/* Bean Bags & Slider Container */}
             <div className="w-full mx-auto">
                 <div className="flex items-center justify-between gap-6">
                     <Image src="/images/bean-robusta.png" alt="Robusta" width={150} height={110} className="h-15 w-auto object-contain" />
@@ -70,14 +101,11 @@ export default function StageRatio({
                             className="ratio-range absolute top-4 w-full touch-pan-y"
                         />
                     </div>
+                    <RatioLabels small />
                 </div>
             </div>
 
-            {/* Summary Cards (Visible on Mobile) */}
             <div className="w-full flex flex-col gap-2">
-
-
-                {/* Card 2: Summary */}
                 <div className="rounded-2xl bg-[#1a1512] p-3 text-white shadow-lg">
                     <div className="mb-2 flex items-center justify-between">
                         <h4 className="text-xs font-bold text-caramel">نتیجه انتخاب شما</h4>
@@ -92,7 +120,6 @@ export default function StageRatio({
                     </dl>
                 </div>
 
-                {/* Card 3: Custom Suggestion */}
                 <div className="rounded-2xl bg-[#1a1512] p-3 text-white shadow-lg mb-2">
                     <h4 className="mb-1 text-xs font-bold text-caramel">تمای داری خودت پیشنهاد بده</h4>
                     <p className="mb-2 text-[9px] leading-relaxed text-white/70">
@@ -113,7 +140,7 @@ export default function StageRatio({
     const renderDesktop = (
         <>
             <div className="absolute bottom-[6%] left-1/2 z-10 w-full max-w-[92%] -translate-x-1/2 transition-opacity duration-500 sm:max-w-176">
-                <div className="mb-2 flex items-center justify-around">
+                <div className="mb-2 flex items-center justify-between">
                     <Image src="/images/bean-robusta.png" alt="" width={150} height={110} className="h-16 w-auto sm:h-20" />
                     <Image src="/images/bean-arabica.png" alt="" width={150} height={110} className="h-16 w-auto sm:h-20" />
                 </div>
@@ -151,11 +178,11 @@ export default function StageRatio({
                             className="ratio-range absolute top-3 w-full"
                         />
                     </div>
+                    <RatioLabels />
                 </div>
             </div>
 
             <div className="md:flex absolute top-1/2 -translate-y-1/2 w-full my-auto right-[5%] hidden max-w-xs flex-col gap-3">
-                {/* Card 1: selected device */}
                 <div className="rounded-3xl bg-[#f5efe6] p-4 text-center shadow-lg">
                     <p className="mb-3 text-xs font-semibold text-ink/60">دستگاه انتخاب شده</p>
                     <div className="mb-3 flex items-center justify-center gap-4">
@@ -189,7 +216,6 @@ export default function StageRatio({
                     </button>
                 </div>
 
-                {/* Card 2: summary */}
                 <div className="rounded-3xl bg-[#1a1512] p-4 text-white shadow-lg">
                     <div className="mb-3 flex items-center justify-between">
                         <h4 className="text-sm font-bold text-caramel">نتیجه انتخاب شما</h4>
@@ -204,7 +230,6 @@ export default function StageRatio({
                     </dl>
                 </div>
 
-                {/* Card 3: custom suggestion */}
                 <div className="rounded-3xl bg-[#1a1512] p-4 text-white shadow-lg">
                     <h4 className="mb-1 text-sm font-bold text-caramel">تمای داری خودت پیشنهاد بده</h4>
                     <p className="mb-3 text-[0.7rem] leading-relaxed text-white/70">
@@ -222,7 +247,6 @@ export default function StageRatio({
         </>
     );
 
-    // 2. Fixed the return statement syntax
     return isMobile ? renderMobile : renderDesktop;
 }
 
