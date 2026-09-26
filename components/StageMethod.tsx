@@ -27,7 +27,13 @@ export default function StageMethod({
             <div
                 role="group"
                 aria-label="روش دم‌آوری را انتخاب کنید"
-                className="flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain scroll-px-4 px-4 pb-3 scrollbar-hidden"
+                className="
+                    flex flex-nowrap items-stretch gap-3 px-4 pb-3
+                    overflow-x-auto overflow-y-hidden overscroll-x-contain scroll-px-4
+                    snap-x snap-mandatory
+                    sm:snap-none sm:scroll-smooth
+                "
+                style={{ scrollbarWidth: "thin" }}
             >
                 {BREW_METHODS.map((method) => {
                     const active = selectedMethod?.id === method.id;
