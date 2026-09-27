@@ -131,7 +131,7 @@ export default function StageConsumption({
             <div
                 role="radiogroup"
                 aria-label="میزان مصرف هفتگی را انتخاب کنید"
-                className="flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain scroll-px-4 px-4 pb-3 scrollbar-hidden"
+                className="flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain scroll-px-4 px-4 pb-3 scrollbar-auto"
             >
                 {CONSUMPTION_OPTIONS.map((option) => {
                     const active = option.id === selectedConsumptionId;

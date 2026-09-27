@@ -23,9 +23,8 @@ const STEPS: Array<{ id: number; label: string }> = [
     { id: 6, label: "پیشنهاد نهایی" },
 ];
 
-
 function playNarration(src: string, muted: boolean, start: boolean) {
-    if (start) return
+    if (start) return;
     if (muted) return;
     const audio = new Audio(src);
     audio.play().catch(() => { });
@@ -43,10 +42,6 @@ export default function CoffeeWizard() {
     const [muted, setMuted] = useState(false);
     const [startSpeaking, setStartSpeaking] = useState(false);
 
-    /* ------------------------------------------------------------------ *
-     * Timers
-     * ------------------------------------------------------------------ */
-
     const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
     const after = (ms: number, fn: () => void) => {
         timers.current.push(setTimeout(fn, ms));
@@ -62,28 +57,56 @@ export default function CoffeeWizard() {
         (c) => c.id === selectedConsumptionId
     )?.range;
 
-    /* ------------------------------------------------------------------ *
-     * Wizard actions
-     * ------------------------------------------------------------------ */
-
     function handleStart() {
-        playNarration("/audio/narration-step1.mp3", muted, startSpeaking);
+        playNarration("/audio/step1_2.mp4", muted, startSpeaking);
         setStartSpeaking(true);
-        after(2000, () => {
-            setStage(1);
-        });
-        after(4200, () => {
-            setStartSpeaking(false);
-        });
+        after(2000, () => setStage(1));
+        after(4200, () => setStartSpeaking(false));
     }
 
     function goToNext() {
+        if (startSpeaking) return
         if (stage === 1) {
             after(500, () => {
                 setStartSpeaking(true);
-                playNarration("/audio/narration-step2.mp3", muted, startSpeaking);
+                playNarration("/audio/step3.mp4", muted, startSpeaking);
                 setStage(2);
-                after(5650, () => setStartSpeaking(false));
+                after(4000, () => setStartSpeaking(false));
+            });
+            return;
+        } else if (stage === 2) {
+            after(500, () => {
+                setStartSpeaking(true);
+                if (robusta >= arabica)
+                    playNarration("/audio/step4_r.mp4", muted, startSpeaking);
+                else
+                    playNarration("/audio/step4_a.mp4", muted, startSpeaking);
+                setStage(3);
+                after(4000, () => setStartSpeaking(false));
+            });
+            return;
+        } else if (stage === 3) {
+            after(500, () => {
+                setStartSpeaking(true);
+                playNarration("/audio/step5.mp4", muted, startSpeaking);
+                setStage(4);
+                after(4000, () => setStartSpeaking(false));
+            });
+            return;
+        } else if (stage === 4) {
+            after(500, () => {
+                setStartSpeaking(true);
+                playNarration("/audio/step6.mp4", muted, startSpeaking);
+                setStage(5);
+                after(4000, () => setStartSpeaking(false));
+            });
+            return;
+        } else if (stage === 5) {
+            after(500, () => {
+                setStartSpeaking(true);
+                playNarration("/audio/step7.mp4", muted, startSpeaking);
+                setStage(6);
+                after(4000, () => setStartSpeaking(false));
             });
             return;
         }
@@ -108,46 +131,53 @@ export default function CoffeeWizard() {
     return (
         <section
             aria-label="ویزارت ساخت قهوه"
-            className="relative w-full overflow-hidden bg-black h-[calc(100dvh-4rem)]"
+            className="relative h-[calc(100dvh-4rem)] w-full overflow-hidden bg-black"
         >
-            <div className={`absolute inset-0 overflow-hidden origin-[50%_5%] scale-[2] sm:scale-[1.35] lg:scale-100`}>
-                <Image
-                    src="/images/hero-bg.webp"
-                    fill
-                    alt="Background image for the hero section of the coffee wizard"
-                    className="md:object-contain object-cover md:pb-0 pb-100"
-                    loading="eager"
-                />
+            {/* Background layer — outer clips, inner scales */}
+            <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                <div className="absolute inset-0 origin-[50%_5%] scale-[2] sm:scale-[1.35] lg:scale-100">
+                    <Image
+                        src="/images/hero-bg.webp"
+                        fill
+                        alt="Background image for the hero section of the coffee wizard"
+                        className="object-cover pb-100 md:object-contain md:pb-0"
+                        loading="eager"
+                    />
 
-                {startSpeaking && (
-                    <Image
-                        src="/images/barista-speaking.gif"
-                        alt=""
-                        fill
-                        sizes="100vw"
-                        unoptimized
-                        className="md:object-contain object-cover animate-fade-in md:pb-0 pb-100"
-                    />
-                )}
-                {stage === 1 && (
-                    <Image
-                        src="/images/overlay-choose-machine.png"
-                        alt=""
-                        fill
-                        sizes="100vw"
-                        className="object-contain animate-fade-in md:flex hidden"
-                    />
-                )}
-                {stage === 2 && (
-                    <Image
-                        src="/images/overlay-choose-ratio.png"
-                        alt=""
-                        fill
-                        sizes="100vw"
-                        className="object-contain animate-fade-in md:flex hidden"
-                    />
-                )}
+                    {startSpeaking && (
+                        <Image
+                            src="/images/barista-speaking.gif"
+                            alt=""
+                            fill
+                            sizes="100vw"
+                            unoptimized
+                            className="animate-fade-in object-cover pb-100 md:object-contain md:pb-0"
+                        />
+                    )}
+
+                    {stage === 1 && (
+                        <Image
+                            src="/images/overlay-choose-machine.png"
+                            alt=""
+                            fill
+                            sizes="100vw"
+                            className="animate-fade-in hidden object-contain md:flex"
+                        />
+                    )}
+
+                    {stage === 2 && (
+                        <Image
+                            src="/images/overlay-choose-ratio.png"
+                            alt=""
+                            fill
+                            sizes="100vw"
+                            className="animate-fade-in hidden object-contain md:flex"
+                        />
+                    )}
+                </div>
             </div>
+
+            {/* Mute button */}
             <button
                 type="button"
                 onClick={() => setMuted((m) => !m)}
@@ -158,36 +188,34 @@ export default function CoffeeWizard() {
                 {muted ? <SpeakerOffIcon className="h-4 w-4" /> : <SpeakerIcon className="h-4 w-4" />}
             </button>
 
+            {/* Steps indicator */}
             {stage !== 0 && stage !== 7 && (
-                <div className="absolute flex justify-self-center md:top-10 top-1 z-10 transition-opacity duration-500 bg-black lg:w-2xl w-auto rounded-b-lg ">
-                    <ol aria-label="مراحل ساخت قهوه" className="flex items-start justify-between gap-1 w-full">
+                <div className="absolute top-1 left-1/2 z-10 w-auto max-w-[96vw] -translate-x-1/2 rounded-b-lg bg-black md:top-10 lg:w-2xl">
+                    <ol aria-label="مراحل ساخت قهوه" className="flex w-full items-start justify-between gap-1">
                         {STEPS.map((step, i) => {
                             const active = currentStepIndex === i;
                             return (
                                 <li
                                     key={step.id}
-                                    className="relative flex flex-1 flex-col items-center"
+                                    className="relative flex min-w-0 flex-1 flex-col items-center"
                                     aria-current={active ? "step" : undefined}
                                 >
                                     {i < STEPS.length - 1 && (
                                         <span
                                             aria-hidden
-                                            className={`absolute right-1/2 top-4.5 h-px w-full ${active ? "bg-caramel/60" : "bg-white/20"
-                                                }`}
+                                            className={`absolute top-4.5 right-1/2 h-px w-full ${active ? "bg-caramel/60" : "bg-white/20"}`}
                                         />
                                     )}
                                     <span
                                         className={`relative grid h-9 w-9 place-items-center rounded-full border-2 text-sm font-bold backdrop-blur-sm transition ${active
                                             ? "border-caramel bg-caramel/15 text-caramel"
-                                            : "border-white/40 bg-black/40 text-white/70"
-                                            }`}
+                                            : "border-white/40 bg-black/40 text-white/70"}`}
                                     >
                                         {step.id}
                                     </span>
 
                                     <span
-                                        className={`mt-1.5 max-w-18 text-center text-[0.6rem] leading-tight sm:text-[0.7rem] ${active ? "font-bold text-caramel" : "font-medium text-white/70"
-                                            }`}
+                                        className={`mt-1.5 max-w-18 text-center text-[0.6rem] leading-tight sm:text-[0.7rem] ${active ? "font-bold text-caramel" : "font-medium text-white/70"}`}
                                     >
                                         {step.label}
                                     </span>
@@ -198,48 +226,45 @@ export default function CoffeeWizard() {
                 </div>
             )}
 
+            {/* Stage 0 — Start */}
             {stage === 0 && (
-                <div className="absolute justify-self-center bottom-10 z-10 flex flex-col items-center backdrop-blur-xs rounded-lg px-4 p-3 text-center">
-                    {/* Headline */}
-                    <h2 className="mb-2 text-lg font-extrabold leading-snug text-white sm:text-xl">
+                <div className="absolute bottom-10 left-1/2 z-10 flex w-full max-w-[92%] -translate-x-1/2 flex-col items-center rounded-lg p-3 px-4 text-center backdrop-blur-xs sm:max-w-md">
+                    <h2 className="mb-2 text-lg leading-snug font-extrabold text-white sm:text-xl">
                         قهوه اختصاصی تو، تجربه‌ای خاص برای تو
                     </h2>
 
-                    {/* Subtitle */}
-                    <p className="mb-5 max-w-xs text-xs leading-relaxed sm:text-sm text-caramel">
+                    <p className="mb-5 max-w-xs text-xs leading-relaxed text-caramel sm:text-sm">
                         از انتخاب دانه تا آماده‌سرایی، همه چیز با سلیقه تو
                     </p>
 
-                    {/* Primary CTA */}
                     <button
                         type="button"
                         onClick={handleStart}
-                        className="group flex w-full max-w-xs items-center justify-center gap-2 rounded-full bg-[#f5efe6] px-6 py-3 text-sm font-bold text-ink shadow-lg transition hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/50 active:scale-100"
+                        className="group flex w-full max-w-xs items-center justify-center gap-2 rounded-full bg-[#f5efe6] px-6 py-3 text-sm font-bold text-ink shadow-lg transition hover:scale-[1.02] focus-visible:ring-4 focus-visible:ring-white/50 focus-visible:outline-none active:scale-100"
                     >
                         <CoffeeCupIcon className="h-5 w-5 text-caramel transition group-hover:scale-110" />
                         <span>شروع سفارش</span>
                     </button>
 
-                    {/* Secondary link */}
                     <button
                         type="button"
                         onClick={handleStart}
-                        className="mt-4 flex items-center gap-2 text-[0.7rem] font-medium text-white/85 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 sm:text-xs"
+                        className="mt-4 flex items-center gap-2 text-[0.7rem] font-medium text-white/85 transition hover:text-white focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none sm:text-xs"
                     >
                         <span className="text-caramel">چطور قهوه اختصاصی من ساخته می‌شود</span>
-                        <span className="grid h-5 w-5 place-items-center rounded-full border border-text-caramel text-caramel">
+                        <span className="text-caramel grid h-5 w-5 place-items-center rounded-full border border-caramel">
                             <ChevronIcon className="h-3 w-3" />
                         </span>
                     </button>
                 </div>
             )}
 
-            {/* Step 1 — Brew-method carousel */}
+            {/* Stage 1 */}
             {stage === 1 && (
                 <StageMethod selectedMethod={selectedMethod} onSelectMethod={setSelectedMethod} />
             )}
 
-            {/* Step 2 — Arabica/Robusta ratio */}
+            {/* Stage 2 */}
             {stage === 2 && (
                 <StageRatio
                     robusta={robusta}
@@ -250,12 +275,12 @@ export default function CoffeeWizard() {
                 />
             )}
 
-            {/* Step 3 — Arabica origin */}
+            {/* Stage 3 */}
             {stage === 3 && (
                 <StageOrigin selectedOrigin={selectedOrigin} onSelectOrigin={setSelectedOrigin} />
             )}
 
-            {/* Step 4 — Taste */}
+            {/* Stage 4 */}
             {stage === 4 && (
                 <StageTaste
                     robusta={robusta}
@@ -267,7 +292,7 @@ export default function CoffeeWizard() {
                 />
             )}
 
-            {/* Step 5 — Consumption */}
+            {/* Stage 5 */}
             {stage === 5 && (
                 <StageConsumption
                     selectedConsumptionId={selectedConsumptionId}
@@ -275,7 +300,7 @@ export default function CoffeeWizard() {
                 />
             )}
 
-            {/* Step 6 — Final suggestion */}
+            {/* Stage 6 */}
             {stage === 6 && (
                 <StageFinal
                     selectedMethod={selectedMethod}
@@ -292,7 +317,7 @@ export default function CoffeeWizard() {
                 />
             )}
 
-            {/* Step 7 — Checkout */}
+            {/* Stage 7 */}
             {stage === 7 && (
                 <StageCheckout
                     selectedMethod={selectedMethod}
@@ -305,12 +330,13 @@ export default function CoffeeWizard() {
                 />
             )}
 
+            {/* Bottom nav */}
             {stage >= 1 && stage <= 5 && (
-                <div className="mb-4 flex items-center justify-between gap-2 absolute bottom-0 left-1/2 z-10 w-full max-w-[92%] -translate-x-1/2 transition-opacity duration-500 sm:max-w-176">
+                <div className="absolute bottom-0 left-1/2 z-10 mb-4 flex w-full max-w-[92%] -translate-x-1/2 items-center justify-between gap-2 transition-opacity duration-500 sm:max-w-176">
                     <button
                         type="button"
                         onClick={goToNext}
-                        className="rounded-full bg-roast px-4 py-1.5 text-xs font-bold text-white shadow-sm transition hover:bg-espresso focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caramel"
+                        className="rounded-full bg-roast px-4 py-1.5 text-xs font-bold text-white shadow-sm transition hover:bg-espresso focus-visible:ring-2 focus-visible:ring-caramel focus-visible:outline-none"
                     >
                         مرحله بعد
                     </button>
@@ -318,7 +344,7 @@ export default function CoffeeWizard() {
                         type="button"
                         disabled={stage === 1}
                         onClick={goToPrevious}
-                        className="rounded-full border-2 border-caramel px-4 py-1 text-xs font-semibold text-caramel transition hover:bg-beige focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caramel disabled:cursor-not-allowed disabled:opacity-30"
+                        className="rounded-full border-2 border-caramel px-4 py-1 text-xs font-semibold text-caramel transition hover:bg-beige focus-visible:ring-2 focus-visible:ring-caramel focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-30"
                     >
                         مرحله قبل
                     </button>

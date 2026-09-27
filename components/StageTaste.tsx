@@ -123,72 +123,76 @@ export default function StageTaste({
             </h3>
 
             {/* ── Flavor carousel ───────────────────────────────────── */}
+            {/* ── Flavor carousel ───────────────────────────────────── */}
             <div
                 role="radiogroup"
                 aria-label="طعم مورد علاقه را انتخاب کنید"
-                className="flex snap-x snap-mandatory gap-3  overflow-x-auto overscroll-x-contain scroll-px-4 px-4 pb-3 scrollbar-hidden"
+                className="scrollbar-hidden w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain pb-3"
+                style={{ WebkitOverflowScrolling: "touch" }}
             >
-                {TASTE_OPTIONS.map((taste) => {
-                    const active = taste.id === selectedTasteId;
-                    return (
-                        <button
-                            key={taste.id}
-                            type="button"
-                            role="radio"
-                            aria-checked={active}
-                            onClick={() => onSelectTaste(taste.id)}
-                            className={`group flex h-44 w-28 shrink-0 snap-center flex-col items-center rounded-2xl border-2 bg-[#f5efe6] p-3 backdrop-blur-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caramel sm:h-48 sm:w-32 ${active
-                                ? "border-caramel shadow-[0_0_0_3px_rgba(0,0,0,0.4)]"
-                                : "border-white/10 hover:border-white/25"
-                                }`}
-                        >
-                            <span
-                                className={`mb-3 grid h-12 w-12 place-items-center rounded-full transition ${active ? "bg-caramel/15" : "bg-white/5"
+                <div className="flex gap-3 px-4 overflow-auto">
+                    {TASTE_OPTIONS.map((taste) => {
+                        const active = taste.id === selectedTasteId;
+                        return (
+                            <button
+                                key={taste.id}
+                                type="button"
+                                role="radio"
+                                aria-checked={active}
+                                onClick={() => onSelectTaste(taste.id)}
+                                className={`group flex h-44 w-28 shrink-0 snap-center flex-col items-center rounded-2xl border-2 bg-[#f5efe6] p-3 backdrop-blur-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caramel sm:h-48 sm:w-32 ${active
+                                        ? "border-caramel shadow-[0_0_0_3px_rgba(0,0,0,0.4)]"
+                                        : "border-white/10 hover:border-white/25"
                                     }`}
                             >
-                                <Image
-                                    src={taste.icon}
-                                    alt=""
-                                    width={32}
-                                    height={32}
-                                    className="h-7 w-7 object-contain"
-                                    unoptimized
-                                />
-                            </span>
-
-                            <span
-                                className={`mb-2 line-clamp-2 text-center text-[0.7rem] font-semibold leading-tight ${active ? "text-caramel" : ""
-                                    }`}
-                            >
-                                {taste.name}
-                            </span>
-
-                            <span className="mb-2 flex gap-1">
-                                {[0, 1, 2].map((i) => (
-                                    <span
-                                        key={i}
-                                        className={`h-1.5 w-1.5 rounded-full ${i < taste.rating
-                                            ? active
-                                                ? "bg-caramel"
-                                                : "bg-white/60"
-                                            : "bg-white/15"
-                                            }`}
+                                <span
+                                    className={`mb-3 grid h-12 w-12 place-items-center rounded-full transition ${active ? "bg-caramel/15" : "bg-white/5"
+                                        }`}
+                                >
+                                    <Image
+                                        src={taste.icon}
+                                        alt=""
+                                        width={32}
+                                        height={32}
+                                        className="h-7 w-7 object-contain"
+                                        unoptimized
                                     />
-                                ))}
-                            </span>
+                                </span>
 
-                            <span
-                                aria-hidden
-                                className={`mt-auto grid h-5 w-5 place-items-center rounded-full transition ${active
-                                    ? "bg-caramel text-white ring-2 ring-white/70"
-                                    : "border border-white/20 text-transparent"
-                                    }`}
-                            >
-                                <CheckIcon className="h-3 w-3" />
-                            </span>
-                        </button>
-                    );
-                })}
+                                <span
+                                    className={`mb-2 line-clamp-2 text-center text-[0.7rem] font-semibold leading-tight ${active ? "text-caramel" : ""
+                                        }`}
+                                >
+                                    {taste.name}
+                                </span>
+
+                                <span className="mb-2 flex gap-1">
+                                    {[0, 1, 2].map((i) => (
+                                        <span
+                                            key={i}
+                                            className={`h-1.5 w-1.5 rounded-full ${i < taste.rating
+                                                    ? active
+                                                        ? "bg-caramel"
+                                                        : "bg-white/60"
+                                                    : "bg-white/15"
+                                                }`}
+                                        />
+                                    ))}
+                                </span>
+
+                                <span
+                                    aria-hidden
+                                    className={`mt-auto grid h-5 w-5 place-items-center rounded-full transition ${active
+                                            ? "bg-caramel text-white ring-2 ring-white/70"
+                                            : "border border-white/20 text-transparent"
+                                        }`}
+                                >
+                                    <CheckIcon className="h-3 w-3" />
+                                </span>
+                            </button>
+                        );
+                    })}
+                </div>
             </div>
             <p className="sr-only" aria-live="polite">
                 {selectedTaste
