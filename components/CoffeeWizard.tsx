@@ -23,10 +23,19 @@ const STEPS: Array<{ id: number; label: string }> = [
     { id: 6, label: "پیشنهاد نهایی" },
 ];
 
-function playNarration(src: string, muted: boolean, start: boolean) {
+function playNarration(src: string, muted: boolean, start: boolean, gain = 2.0) {
     if (start) return;
     if (muted) return;
+
     const audio = new Audio(src);
+
+    const ctx = new AudioContext();
+    const source = ctx.createMediaElementSource(audio);
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = gain; // 1.0 = normal, 2.0 = 2x, etc.
+
+    source.connect(gainNode).connect(ctx.destination);
+
     audio.play().catch(() => { });
 }
 
@@ -168,6 +177,57 @@ export default function CoffeeWizard() {
                     {stage === 2 && (
                         <Image
                             src="/images/overlay-choose-ratio.png"
+                            alt=""
+                            fill
+                            sizes="100vw"
+                            className="animate-fade-in hidden object-contain md:flex"
+                        />
+                    )}
+
+
+                    {stage === 3 && (
+                        <>
+                            {robusta >= 50 ?
+                                <Image
+                                    src="/images/step3r.png"
+                                    alt=""
+                                    fill
+                                    sizes="100vw"
+                                    className="animate-fade-in hidden object-contain md:flex"
+                                />
+                                :
+                                <Image
+                                    src="/images/step3a.png"
+                                    alt=""
+                                    fill
+                                    sizes="100vw"
+                                    className="animate-fade-in hidden object-contain md:flex"
+                                />
+                            }
+                        </>
+                    )}
+
+                    {stage === 4 && (
+                        <Image
+                            src="/images/step4.png"
+                            alt=""
+                            fill
+                            sizes="100vw"
+                            className="animate-fade-in hidden object-contain md:flex"
+                        />
+                    )}
+                    {stage === 5 && (
+                        <Image
+                            src="/images/step5.png"
+                            alt=""
+                            fill
+                            sizes="100vw"
+                            className="animate-fade-in hidden object-contain md:flex"
+                        />
+                    )}
+                    {stage === 6 && (
+                        <Image
+                            src="/images/step6.png"
                             alt=""
                             fill
                             sizes="100vw"
