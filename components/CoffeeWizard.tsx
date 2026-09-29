@@ -23,20 +23,54 @@ const STEPS: Array<{ id: number; label: string }> = [
     { id: 6, label: "پیشنهاد نهایی" },
 ];
 
-function playNarration(src: string, muted: boolean, start: boolean, gain = 2.0) {
-    if (start) return;
-    if (muted) return;
+/**
+ * Play a narration clip through a gain node.
+ *
+ * Returns the Audio element (or null when playback was skipped), so the
+ * caller can stop it later if needed.
+ */
+function playNarration(
+    src: string,
+    muted: boolean,
+    gain = 2.0
+): HTMLAudioElement | null {
+    if (muted) return null;
+    if (typeof window === "undefined") return null;
 
     const audio = new Audio(src);
+    audio.preload = "auto";
 
-    const ctx = new AudioContext();
-    const source = ctx.createMediaElementSource(audio);
-    const gainNode = ctx.createGain();
-    gainNode.gain.value = gain; // 1.0 = normal, 2.0 = 2x, etc.
+    const AudioCtx =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext?: typeof AudioContext })
+            .webkitAudioContext;
 
-    source.connect(gainNode).connect(ctx.destination);
+    // Fall back to plain playback if the Web Audio API is unavailable.
+    if (!AudioCtx) {
+        void audio.play().catch(() => { });
+        return audio;
+    }
 
-    audio.play().catch(() => { });
+    try {
+        const ctx = new AudioCtx();
+        const source = ctx.createMediaElementSource(audio);
+        const gainNode = ctx.createGain();
+        gainNode.gain.value = gain;
+
+        source.connect(gainNode).connect(ctx.destination);
+
+        // Close the context once the clip ends to avoid leaking contexts.
+        audio.addEventListener("ended", () => {
+            void ctx.close().catch(() => { });
+        });
+
+        void audio.play().catch(() => { });
+    } catch {
+        // If the context/element wiring fails, still try plain playback.
+        void audio.play().catch(() => { });
+    }
+
+    return audio;
 }
 
 export default function CoffeeWizard() {
@@ -52,10 +86,30 @@ export default function CoffeeWizard() {
     const [startSpeaking, setStartSpeaking] = useState(false);
 
     const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+    const currentAudio = useRef<HTMLAudioElement | null>(null);
+
     const after = (ms: number, fn: () => void) => {
         timers.current.push(setTimeout(fn, ms));
     };
-    useEffect(() => () => timers.current.forEach(clearTimeout), []);
+
+    const clearTimers = () => {
+        timers.current.forEach(clearTimeout);
+        timers.current = [];
+    };
+
+    useEffect(
+        () => () => {
+            clearTimers();
+            if (currentAudio.current) {
+                try {
+                    currentAudio.current.pause();
+                } catch {
+                    /* ignore */
+                }
+            }
+        },
+        []
+    );
 
     const arabica = 100 - robusta;
     const currentStepIndex = STEPS.findIndex((s) => s.id === stage);
@@ -66,68 +120,85 @@ export default function CoffeeWizard() {
         (c) => c.id === selectedConsumptionId
     )?.range;
 
+    /** Start narration for a step and remember the Audio element. */
+    function narrate(src: string) {
+        if (currentAudio.current) {
+            try {
+                currentAudio.current.pause();
+            } catch {
+                /* ignore */
+            }
+        }
+        currentAudio.current = playNarration(src, muted);
+    }
+
+    /**
+     * Advance one stage with narration.
+     * - Cancels any pending timers so a rapid double-click can't desync.
+     * - Uses `startSpeaking` only as the GIF-visibility flag.
+     */
+    function advanceWithNarration(src: string, nextStage: number) {
+        if (startSpeaking) return;
+        clearTimers();
+        after(500, () => {
+            setStartSpeaking(true);
+            narrate(src);
+            setStage(nextStage);
+            after(4000, () => setStartSpeaking(false));
+        });
+    }
+
     function handleStart() {
-        playNarration("/audio/step1_2.mp4", muted, startSpeaking);
+        clearTimers();
         setStartSpeaking(true);
-        after(2000, () => setStage(1));
+        narrate("/audio/step1_2.mp4");
+        after(1500, () => setStage(1));
         after(4200, () => setStartSpeaking(false));
     }
 
     function goToNext() {
-        if (startSpeaking) return
-        if (stage === 1) {
-            after(500, () => {
-                setStartSpeaking(true);
-                playNarration("/audio/step3.mp4", muted, startSpeaking);
-                setStage(2);
-                after(4000, () => setStartSpeaking(false));
-            });
-            return;
-        } else if (stage === 2) {
-            after(500, () => {
-                setStartSpeaking(true);
-                if (robusta >= arabica)
-                    playNarration("/audio/step4_r.mp4", muted, startSpeaking);
-                else
-                    playNarration("/audio/step4_a.mp4", muted, startSpeaking);
-                setStage(3);
-                after(4000, () => setStartSpeaking(false));
-            });
-            return;
-        } else if (stage === 3) {
-            after(500, () => {
-                setStartSpeaking(true);
-                playNarration("/audio/step5.mp4", muted, startSpeaking);
-                setStage(4);
-                after(4000, () => setStartSpeaking(false));
-            });
-            return;
-        } else if (stage === 4) {
-            after(500, () => {
-                setStartSpeaking(true);
-                playNarration("/audio/step6.mp4", muted, startSpeaking);
-                setStage(5);
-                after(4000, () => setStartSpeaking(false));
-            });
-            return;
-        } else if (stage === 5) {
-            after(500, () => {
-                setStartSpeaking(true);
-                playNarration("/audio/step7.mp4", muted, startSpeaking);
-                setStage(6);
-                after(4000, () => setStartSpeaking(false));
-            });
-            return;
+        if (startSpeaking) return;
+
+        switch (stage) {
+            case 1:
+                advanceWithNarration("/audio/step3.mp4", 2);
+                return;
+            case 2:
+                advanceWithNarration(
+                    robusta >= arabica ? "/audio/step4_r.mp4" : "/audio/step4_a.mp4",
+                    3
+                );
+                return;
+            case 3:
+                advanceWithNarration("/audio/step5.mp4", 4);
+                return;
+            case 4:
+                advanceWithNarration("/audio/step6.mp4", 5);
+                return;
+            case 5:
+                advanceWithNarration("/audio/step7.mp4", 6);
+                return;
+            case 6:
+                setStage(7);
+                return;
+            default:
+                return;
         }
-        if (stage === 6) {
-            setStage(7);
-            return;
-        }
-        if (stage < 1 || stage > 6) return;
-        setStage(stage + 1);
     }
 
     function goToPrevious() {
+        // Abandon any in-flight narration / pending advance.
+        clearTimers();
+        if (currentAudio.current) {
+            try {
+                currentAudio.current.pause();
+            } catch {
+                /* ignore */
+            }
+            currentAudio.current = null;
+        }
+        setStartSpeaking(false);
+
         if (stage === 7) {
             setStage(6);
             return;
@@ -164,19 +235,42 @@ export default function CoffeeWizard() {
                         />
                     )}
 
-                    {stage === 1 && (
+                    {stage === 0 && (
                         <Image
-                            src="/images/overlay-choose-machine.png"
-                            alt=""
+                            src="/images/text/text1.webp"
+                            alt="step1"
                             fill
                             sizes="100vw"
                             className="animate-fade-in hidden object-contain md:flex"
+                            loading="eager"
+                        />
+                    )}
+
+                    {stage === 1 && (
+                        <Image
+                            src="/images/text/text2.webp"
+                            alt="step2"
+                            fill
+                            sizes="100vw"
+                            className="animate-fade-in hidden object-contain md:flex"
+                            loading="eager"
                         />
                     )}
 
                     {stage === 2 && (
                         <Image
-                            src="/images/overlay-choose-ratio.png"
+                            src="/images/text/text3.webp"
+                            alt="step2"
+                            fill
+                            sizes="100vw"
+                            className="animate-fade-in hidden object-contain md:flex"
+                            loading="eager"
+                        />
+                    )}
+
+                    {stage === 3 && (
+                        <Image
+                            src={robusta >= 50 ? "/images/text/text4r.webp" : "/images/text/text4a.webp"}
                             alt=""
                             fill
                             sizes="100vw"
@@ -184,32 +278,9 @@ export default function CoffeeWizard() {
                         />
                     )}
 
-
-                    {stage === 3 && (
-                        <>
-                            {robusta >= 50 ?
-                                <Image
-                                    src="/images/step3r.png"
-                                    alt=""
-                                    fill
-                                    sizes="100vw"
-                                    className="animate-fade-in hidden object-contain md:flex"
-                                />
-                                :
-                                <Image
-                                    src="/images/step3a.png"
-                                    alt=""
-                                    fill
-                                    sizes="100vw"
-                                    className="animate-fade-in hidden object-contain md:flex"
-                                />
-                            }
-                        </>
-                    )}
-
                     {stage === 4 && (
                         <Image
-                            src="/images/step4.png"
+                            src="/images/text/text5.webp"
                             alt=""
                             fill
                             sizes="100vw"
@@ -218,7 +289,7 @@ export default function CoffeeWizard() {
                     )}
                     {stage === 5 && (
                         <Image
-                            src="/images/step5.png"
+                            src="/images/text/text6.webp"
                             alt=""
                             fill
                             sizes="100vw"
@@ -227,7 +298,7 @@ export default function CoffeeWizard() {
                     )}
                     {stage === 6 && (
                         <Image
-                            src="/images/step6.png"
+                            src="/images/text/text7.webp"
                             alt=""
                             fill
                             sizes="100vw"
@@ -240,7 +311,19 @@ export default function CoffeeWizard() {
             {/* Mute button */}
             <button
                 type="button"
-                onClick={() => setMuted((m) => !m)}
+                onClick={() => {
+                    setMuted((m) => {
+                        const next = !m;
+                        if (next && currentAudio.current) {
+                            try {
+                                currentAudio.current.pause();
+                            } catch {
+                                /* ignore */
+                            }
+                        }
+                        return next;
+                    });
+                }}
                 aria-pressed={!muted}
                 aria-label={muted ? "روشن کردن صدای راهنما" : "قطع صدای راهنما"}
                 className="absolute top-4 left-4 z-20 grid h-9 w-9 place-items-center rounded-full bg-white/85 text-ink shadow backdrop-blur transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caramel"
@@ -396,13 +479,14 @@ export default function CoffeeWizard() {
                     <button
                         type="button"
                         onClick={goToNext}
-                        className="rounded-full bg-roast px-4 py-1.5 text-xs font-bold text-white shadow-sm transition hover:bg-espresso focus-visible:ring-2 focus-visible:ring-caramel focus-visible:outline-none"
+                        disabled={startSpeaking}
+                        className="rounded-full bg-roast px-4 py-1.5 text-xs font-bold text-white shadow-sm transition hover:bg-espresso focus-visible:ring-2 focus-visible:ring-caramel focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         مرحله بعد
                     </button>
                     <button
                         type="button"
-                        disabled={stage === 1}
+                        disabled={stage === 1 || startSpeaking}
                         onClick={goToPrevious}
                         className="rounded-full border-2 border-caramel px-4 py-1 text-xs font-semibold text-caramel transition hover:bg-beige focus-visible:ring-2 focus-visible:ring-caramel focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-30"
                     >
