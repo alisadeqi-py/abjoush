@@ -14,28 +14,28 @@ import StageOrigin from "./StageOrigin";
 import StageRatio from "./StageRatio";
 import StageTaste, { TASTE_OPTIONS } from "./StageTaste";
 
-const STEPS: Array<{ id: number; label: string }> = [
+const classCSS = "animate-fade-in object-cover pb-100 md:object-contain md:pb-0"
+
+const STEPS = [
     { id: 1, label: "انتخاب دستگاه" },
     { id: 2, label: "ترکیب عربیکا و روبوستا" },
     { id: 3, label: "انتخاب خاستگاه" },
     { id: 4, label: "سلیقه و طعم" },
     { id: 5, label: "میزان مصرف" },
     { id: 6, label: "پیشنهاد نهایی" },
-];
+] as const;
 
-/**
- * Play a narration clip through a gain node.
- *
- * Returns the Audio element (or null when playback was skipped), so the
- * caller can stop it later if needed.
- */
-function playNarration(
-    src: string,
-    muted: boolean,
-    gain = 2.0
-): HTMLAudioElement | null {
-    if (muted) return null;
-    if (typeof window === "undefined") return null;
+const STAGE_IMAGES: Record<number, string> = {
+    0: "/images/text/text1.webp",
+    1: "/images/text/text2.webp",
+    2: "/images/text/text3.webp",
+    4: "/images/text/text5.webp",
+    5: "/images/text/text6.webp",
+    6: "/images/text/text7.webp",
+};
+
+function playNarration(src: string, muted: boolean, gain = 2.0) {
+    if (muted || typeof window === "undefined") return null;
 
     const audio = new Audio(src);
     audio.preload = "auto";
@@ -45,7 +45,6 @@ function playNarration(
         (window as unknown as { webkitAudioContext?: typeof AudioContext })
             .webkitAudioContext;
 
-    // Fall back to plain playback if the Web Audio API is unavailable.
     if (!AudioCtx) {
         void audio.play().catch(() => { });
         return audio;
@@ -56,17 +55,10 @@ function playNarration(
         const source = ctx.createMediaElementSource(audio);
         const gainNode = ctx.createGain();
         gainNode.gain.value = gain;
-
         source.connect(gainNode).connect(ctx.destination);
-
-        // Close the context once the clip ends to avoid leaking contexts.
-        audio.addEventListener("ended", () => {
-            void ctx.close().catch(() => { });
-        });
-
+        audio.addEventListener("ended", () => void ctx.close().catch(() => { }));
         void audio.play().catch(() => { });
     } catch {
-        // If the context/element wiring fails, still try plain playback.
         void audio.play().catch(() => { });
     }
 
@@ -74,13 +66,11 @@ function playNarration(
 }
 
 export default function CoffeeWizard() {
-    const [stage, setStage] = useState<number>(0);
+    const [stage, setStage] = useState(0);
     const [selectedMethod, setSelectedMethod] = useState<BrewMethod | null>(null);
     const [selectedOrigin, setSelectedOrigin] = useState<Origin | null>(null);
     const [selectedTasteId, setSelectedTasteId] = useState<number | null>(null);
-    const [selectedConsumptionId, setSelectedConsumptionId] =
-        useState<number | null>(null);
-
+    const [selectedConsumptionId, setSelectedConsumptionId] = useState<number | null>(null);
     const [robusta, setRobusta] = useState(50);
     const [muted, setMuted] = useState(false);
     const [startSpeaking, setStartSpeaking] = useState(false);
@@ -88,55 +78,34 @@ export default function CoffeeWizard() {
     const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
     const currentAudio = useRef<HTMLAudioElement | null>(null);
 
-    const after = (ms: number, fn: () => void) => {
-        timers.current.push(setTimeout(fn, ms));
-    };
 
+    const after = (ms: number, fn: () => void) =>
+        timers.current.push(setTimeout(fn, ms));
     const clearTimers = () => {
         timers.current.forEach(clearTimeout);
         timers.current = [];
     };
+    const stopAudio = () => {
+        try {
+            currentAudio.current?.pause();
+        } catch { }
+        currentAudio.current = null;
+    };
 
-    useEffect(
-        () => () => {
-            clearTimers();
-            if (currentAudio.current) {
-                try {
-                    currentAudio.current.pause();
-                } catch {
-                    /* ignore */
-                }
-            }
-        },
-        []
-    );
+    useEffect(() => () => (clearTimers(), stopAudio()), []);
 
     const arabica = 100 - robusta;
     const currentStepIndex = STEPS.findIndex((s) => s.id === stage);
-    const selectedTasteLabel = TASTE_OPTIONS.find(
-        (t) => t.id === selectedTasteId
-    )?.name;
+    const selectedTasteLabel = TASTE_OPTIONS.find((t) => t.id === selectedTasteId)?.name;
     const selectedConsumptionRange = CONSUMPTION_OPTIONS.find(
         (c) => c.id === selectedConsumptionId
     )?.range;
 
-    /** Start narration for a step and remember the Audio element. */
     function narrate(src: string) {
-        if (currentAudio.current) {
-            try {
-                currentAudio.current.pause();
-            } catch {
-                /* ignore */
-            }
-        }
+        stopAudio();
         currentAudio.current = playNarration(src, muted);
     }
 
-    /**
-     * Advance one stage with narration.
-     * - Cancels any pending timers so a rapid double-click can't desync.
-     * - Uses `startSpeaking` only as the GIF-visibility flag.
-     */
     function advanceWithNarration(src: string, nextStage: number) {
         if (startSpeaking) return;
         clearTimers();
@@ -158,64 +127,43 @@ export default function CoffeeWizard() {
 
     function goToNext() {
         if (startSpeaking) return;
-
-        switch (stage) {
-            case 1:
-                advanceWithNarration("/audio/step3.mp4", 2);
-                return;
-            case 2:
-                advanceWithNarration(
-                    robusta >= arabica ? "/audio/step4_r.mp4" : "/audio/step4_a.mp4",
-                    3
-                );
-                return;
-            case 3:
-                advanceWithNarration("/audio/step5.mp4", 4);
-                return;
-            case 4:
-                advanceWithNarration("/audio/step6.mp4", 5);
-                return;
-            case 5:
-                advanceWithNarration("/audio/step7.mp4", 6);
-                return;
-            case 6:
-                setStage(7);
-                return;
-            default:
-                return;
-        }
+        const next: Record<number, [string, number]> = {
+            1: ["/audio/step3.mp4", 2],
+            2: [robusta >= arabica ? "/audio/step4_r.mp4" : "/audio/step4_a.mp4", 3],
+            3: ["/audio/step5.mp4", 4],
+            4: ["/audio/step6.mp4", 5],
+            5: ["/audio/step7.mp4", 6],
+        };
+        if (stage === 6) return setStage(7);
+        const entry = next[stage];
+        if (entry) advanceWithNarration(entry[0], entry[1]);
     }
 
     function goToPrevious() {
-        // Abandon any in-flight narration / pending advance.
         clearTimers();
-        if (currentAudio.current) {
-            try {
-                currentAudio.current.pause();
-            } catch {
-                /* ignore */
-            }
-            currentAudio.current = null;
-        }
+        stopAudio();
         setStartSpeaking(false);
-
-        if (stage === 7) {
-            setStage(6);
-            return;
-        }
-        if (stage > 1) {
-            setStage(stage - 1);
-        }
+        if (stage === 7) return setStage(6);
+        if (stage > 1) setStage(stage - 1);
     }
+
+    const stageTextSrc =
+        stage === 3
+            ? robusta >= 50
+                ? "/images/text/text4r.webp"
+                : "/images/text/text4a.webp"
+            : STAGE_IMAGES[stage];
+
+
 
     return (
         <section
-            aria-label="ویزارت ساخت قهوه"
-            className="relative h-[calc(100dvh-4rem)] w-full overflow-hidden bg-black"
+            aria-label="ویزارد ساخت قهوه"
+            className="relative flex h-[calc(100dvh-4rem)] min-h-135 w-full flex-col overflow-hidden bg-black sm:min-h-140"
         >
-            {/* Background layer — outer clips, inner scales */}
             <div className="pointer-events-none absolute inset-0 overflow-hidden">
-                <div className="absolute inset-0 origin-[50%_5%] scale-[2] sm:scale-[1.35] lg:scale-100">
+                <div className="absolute inset-0 origin-[50%_5%] scale-[2] sm:scale-[1.35] lg:scale-100"
+                >
                     <Image
                         src="/images/hero-bg.webp"
                         fill
@@ -231,110 +179,51 @@ export default function CoffeeWizard() {
                             fill
                             sizes="100vw"
                             unoptimized
-                            className="animate-fade-in object-cover pb-100 md:object-contain md:pb-0"
+                            className={classCSS}
                         />
                     )}
 
-                    {stage === 0 && (
+                    {stageTextSrc && (
                         <Image
-                            src="/images/text/text1.webp"
-                            alt="step1"
+                            key={stageTextSrc}
+                            src={stageTextSrc}
+                            alt={`step-${stage}`}
                             fill
                             sizes="100vw"
-                            className="animate-fade-in hidden object-contain md:flex"
+                            className={classCSS}
                             loading="eager"
-                        />
-                    )}
-
-                    {stage === 1 && (
-                        <Image
-                            src="/images/text/text2.webp"
-                            alt="step2"
-                            fill
-                            sizes="100vw"
-                            className="animate-fade-in hidden object-contain md:flex"
-                            loading="eager"
-                        />
-                    )}
-
-                    {stage === 2 && (
-                        <Image
-                            src="/images/text/text3.webp"
-                            alt="step2"
-                            fill
-                            sizes="100vw"
-                            className="animate-fade-in hidden object-contain md:flex"
-                            loading="eager"
-                        />
-                    )}
-
-                    {stage === 3 && (
-                        <Image
-                            src={robusta >= 50 ? "/images/text/text4r.webp" : "/images/text/text4a.webp"}
-                            alt=""
-                            fill
-                            sizes="100vw"
-                            className="animate-fade-in hidden object-contain md:flex"
-                        />
-                    )}
-
-                    {stage === 4 && (
-                        <Image
-                            src="/images/text/text5.webp"
-                            alt=""
-                            fill
-                            sizes="100vw"
-                            className="animate-fade-in hidden object-contain md:flex"
-                        />
-                    )}
-                    {stage === 5 && (
-                        <Image
-                            src="/images/text/text6.webp"
-                            alt=""
-                            fill
-                            sizes="100vw"
-                            className="animate-fade-in hidden object-contain md:flex"
-                        />
-                    )}
-                    {stage === 6 && (
-                        <Image
-                            src="/images/text/text7.webp"
-                            alt=""
-                            fill
-                            sizes="100vw"
-                            className="animate-fade-in hidden object-contain md:flex"
                         />
                     )}
                 </div>
+
+                <div
+                    aria-hidden
+                    className="absolute inset-x-0 bottom-0 h-[58%] bg-linear-to-t from-black/70 via-black/25 to-transparent sm:h-[52%]"
+                />
             </div>
 
-            {/* Mute button */}
             <button
                 type="button"
-                onClick={() => {
+                onClick={() =>
                     setMuted((m) => {
                         const next = !m;
-                        if (next && currentAudio.current) {
-                            try {
-                                currentAudio.current.pause();
-                            } catch {
-                                /* ignore */
-                            }
-                        }
+                        if (next) stopAudio();
                         return next;
-                    });
-                }}
+                    })
+                }
                 aria-pressed={!muted}
                 aria-label={muted ? "روشن کردن صدای راهنما" : "قطع صدای راهنما"}
-                className="absolute top-4 left-4 z-20 grid h-9 w-9 place-items-center rounded-full bg-white/85 text-ink shadow backdrop-blur transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caramel"
+                className="absolute top-3 left-3 z-20 grid h-9 w-9 place-items-center rounded-full bg-white/85 text-ink shadow backdrop-blur transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caramel sm:top-4 sm:left-4"
             >
-                {muted ? <SpeakerOffIcon className="h-4 w-4" /> : <SpeakerIcon className="h-4 w-4" />}
+                <SpeakerIcon muted={muted} className="h-4 w-4" />
             </button>
 
-            {/* Steps indicator */}
             {stage !== 0 && stage !== 7 && (
-                <div className="absolute top-1 left-1/2 z-10 w-auto max-w-[96vw] -translate-x-1/2 rounded-b-lg bg-black md:top-10 lg:w-2xl">
-                    <ol aria-label="مراحل ساخت قهوه" className="flex w-full items-start justify-between gap-1">
+                <div className="absolute inset-x-3 top-2 z-10 mx-auto max-w-2xl rounded-xl bg-black/85 px-2 py-2 shadow-lg backdrop-blur supports-backdrop-filter:bg-black/70 sm:inset-x-4 sm:top-3 lg:top-6">
+                    <ol
+                        aria-label="مراحل ساخت قهوه"
+                        className="flex w-full items-start justify-between gap-1"
+                    >
                         {STEPS.map((step, i) => {
                             const active = currentStepIndex === i;
                             return (
@@ -346,19 +235,23 @@ export default function CoffeeWizard() {
                                     {i < STEPS.length - 1 && (
                                         <span
                                             aria-hidden
-                                            className={`absolute top-4.5 right-1/2 h-px w-full ${active ? "bg-caramel/60" : "bg-white/20"}`}
+                                            className={`absolute top-4.5 right-1/2 h-px w-full ${active ? "bg-caramel/60" : "bg-white/20"
+                                                }`}
                                         />
                                     )}
                                     <span
-                                        className={`relative grid h-9 w-9 place-items-center rounded-full border-2 text-sm font-bold backdrop-blur-sm transition ${active
+                                        className={`relative grid h-9 w-9 shrink-0 place-items-center rounded-full border-2 text-sm font-bold backdrop-blur-sm transition ${active
                                             ? "border-caramel bg-caramel/15 text-caramel"
-                                            : "border-white/40 bg-black/40 text-white/70"}`}
+                                            : "border-white/40 bg-black/40 text-white/70"
+                                            }`}
                                     >
                                         {step.id}
                                     </span>
-
                                     <span
-                                        className={`mt-1.5 max-w-18 text-center text-[0.6rem] leading-tight sm:text-[0.7rem] ${active ? "font-bold text-caramel" : "font-medium text-white/70"}`}
+                                        className={`mt-1.5 max-w-18 text-center text-[0.6rem] leading-tight sm:text-[0.7rem] ${active
+                                            ? "font-bold text-caramel"
+                                            : "font-medium text-white/70"
+                                            }`}
                                     >
                                         {step.label}
                                     </span>
@@ -369,17 +262,14 @@ export default function CoffeeWizard() {
                 </div>
             )}
 
-            {/* Stage 0 — Start */}
             {stage === 0 && (
                 <div className="absolute bottom-10 left-1/2 z-10 flex w-full max-w-[92%] -translate-x-1/2 flex-col items-center rounded-lg p-3 px-4 text-center backdrop-blur-xs sm:max-w-md">
                     <h2 className="mb-2 text-lg leading-snug font-extrabold text-white sm:text-xl">
                         قهوه اختصاصی تو، تجربه‌ای خاص برای تو
                     </h2>
-
                     <p className="mb-5 max-w-xs text-xs leading-relaxed text-caramel sm:text-sm">
                         از انتخاب دانه تا آماده‌سرایی، همه چیز با سلیقه تو
                     </p>
-
                     <button
                         type="button"
                         onClick={handleStart}
@@ -388,7 +278,6 @@ export default function CoffeeWizard() {
                         <CoffeeCupIcon className="h-5 w-5 text-caramel transition group-hover:scale-110" />
                         <span>شروع سفارش</span>
                     </button>
-
                     <button
                         type="button"
                         onClick={handleStart}
@@ -402,12 +291,10 @@ export default function CoffeeWizard() {
                 </div>
             )}
 
-            {/* Stage 1 */}
             {stage === 1 && (
                 <StageMethod selectedMethod={selectedMethod} onSelectMethod={setSelectedMethod} />
             )}
 
-            {/* Stage 2 */}
             {stage === 2 && (
                 <StageRatio
                     robusta={robusta}
@@ -418,12 +305,10 @@ export default function CoffeeWizard() {
                 />
             )}
 
-            {/* Stage 3 */}
             {stage === 3 && (
                 <StageOrigin selectedOrigin={selectedOrigin} onSelectOrigin={setSelectedOrigin} />
             )}
 
-            {/* Stage 4 */}
             {stage === 4 && (
                 <StageTaste
                     robusta={robusta}
@@ -435,7 +320,6 @@ export default function CoffeeWizard() {
                 />
             )}
 
-            {/* Stage 5 */}
             {stage === 5 && (
                 <StageConsumption
                     selectedConsumptionId={selectedConsumptionId}
@@ -443,7 +327,6 @@ export default function CoffeeWizard() {
                 />
             )}
 
-            {/* Stage 6 */}
             {stage === 6 && (
                 <StageFinal
                     selectedMethod={selectedMethod}
@@ -460,7 +343,6 @@ export default function CoffeeWizard() {
                 />
             )}
 
-            {/* Stage 7 */}
             {stage === 7 && (
                 <StageCheckout
                     selectedMethod={selectedMethod}
@@ -473,47 +355,58 @@ export default function CoffeeWizard() {
                 />
             )}
 
-            {/* Bottom nav */}
             {stage >= 1 && stage <= 5 && (
-                <div className="absolute bottom-0 left-1/2 z-10 mb-4 flex w-full max-w-[92%] -translate-x-1/2 items-center justify-between gap-2 transition-opacity duration-500 sm:max-w-176">
-                    <button
-                        type="button"
-                        onClick={goToNext}
-                        disabled={startSpeaking}
-                        className="rounded-full bg-roast px-4 py-1.5 text-xs font-bold text-white shadow-sm transition hover:bg-espresso focus-visible:ring-2 focus-visible:ring-caramel focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                        مرحله بعد
-                    </button>
-                    <button
-                        type="button"
-                        disabled={stage === 1 || startSpeaking}
-                        onClick={goToPrevious}
-                        className="rounded-full border-2 border-caramel px-4 py-1 text-xs font-semibold text-caramel transition hover:bg-beige focus-visible:ring-2 focus-visible:ring-caramel focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-30"
-                    >
-                        مرحله قبل
-                    </button>
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-4">
+                    <div className="pointer-events-auto flex w-full max-w-2xl items-center justify-between gap-3">
+                        <button
+                            type="button"
+                            onClick={goToNext}
+                            disabled={startSpeaking}
+                            className="rounded-full bg-roast px-6 py-2 text-xs font-bold text-white shadow-lg transition hover:bg-espresso focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caramel disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            مرحله بعد
+                        </button>
+                        <button
+                            type="button"
+                            disabled={stage === 1 || startSpeaking}
+                            onClick={goToPrevious}
+                            className="rounded-full border-2 border-white/80 bg-black/30 px-5 py-2 text-xs font-semibold text-white backdrop-blur transition hover:bg-white hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caramel disabled:cursor-not-allowed disabled:opacity-30 sm:border-caramel sm:bg-transparent sm:text-caramel sm:backdrop-blur-none sm:hover:bg-beige"
+                        >
+                            مرحله قبل
+                        </button>
+                    </div>
                 </div>
             )}
         </section>
     );
 }
 
-function SpeakerIcon(props: React.SVGProps<SVGSVGElement>) {
+function SpeakerIcon({
+    muted,
+    ...props
+}: React.SVGProps<SVGSVGElement> & { muted?: boolean }) {
     return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            {...props}
+        >
             <path d="M11 5 6 9H2v6h4l5 4z" />
-            <path d="M15.5 8.5a5 5 0 0 1 0 7" />
-            <path d="M18.5 5.5a9 9 0 0 1 0 13" />
-        </svg>
-    );
-}
-
-function SpeakerOffIcon(props: React.SVGProps<SVGSVGElement>) {
-    return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-            <path d="M11 5 6 9H2v6h4l5 4z" />
-            <line x1="22" y1="9" x2="16" y2="15" />
-            <line x1="16" y1="9" x2="22" y2="15" />
+            {muted ? (
+                <>
+                    <line x1="22" y1="9" x2="16" y2="15" />
+                    <line x1="16" y1="9" x2="22" y2="15" />
+                </>
+            ) : (
+                <>
+                    <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+                    <path d="M18.5 5.5a9 9 0 0 1 0 13" />
+                </>
+            )}
         </svg>
     );
 }

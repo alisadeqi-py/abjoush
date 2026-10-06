@@ -110,20 +110,26 @@ export default function StageConsumption({
     onSelectConsumption,
 }: StageConsumptionProps) {
     return (
-        <div className="absolute bottom-[4%] left-1/2 z-10 w-full max-w-[92%] -translate-x-1/2 transition-opacity duration-500 sm:max-w-175">
-            {/* ── Info card ─────────────────────────────────────────── */}
-            <div className="mx-auto mb-3 w-full max-w-64 rounded-3xl bg-[#1a1512] p-4 text-white shadow-lg hidden md:grid">
-                <h4 className="mb-1 text-sm font-bold text-caramel">
-                    چرا این مرحله مهم است؟
-                </h4>
-                <p className="text-[0.7rem] leading-relaxed text-white/70">
-                    با اطلاع از میزان مصرف هفتگی شما می‌تونیم مقدار مناسب و اقتصادی
-                    قهوه رو بهتون پیشنهاد بدیم.
-                </p>
-            </div>
+        <div className="absolute inset-x-0 bottom-[6%] z-10 flex max-h-[min(66vh,560px)] flex-col gap-3 overflow-hidden px-3 sm:left-1/2 sm:inset-x-auto sm:w-full sm:max-w-2xl sm:-translate-x-1/2 sm:px-0">
+            {/* ── Info card — collapsible on mobile ─────────────────── */}
+            <details className="mx-auto w-full max-w-sm rounded-2xl bg-coffee-900 p-3 text-white shadow-lg sm:max-w-64 sm:[&>summary]:hidden sm:open:block open:block" open>
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-xs font-bold text-caramel sm:hidden">
+                    <span>چرا این مرحله مهم است؟</span>
+                    <span className="grid h-6 w-6 place-items-center rounded-full bg-white/10 text-white/80">⌄</span>
+                </summary>
+                <div className="mt-2 sm:mt-0">
+                    <h4 className="mb-1 hidden text-sm font-bold text-caramel sm:block">
+                        چرا این مرحله مهم است؟
+                    </h4>
+                    <p className="text-[0.7rem] leading-relaxed text-white/70">
+                        با اطلاع از میزان مصرف هفتگی شما می‌تونیم مقدار مناسب و اقتصادی
+                        قهوه رو بهتون پیشنهاد بدیم.
+                    </p>
+                </div>
+            </details>
 
             {/* ── Title ─────────────────────────────────────────────── */}
-            <h3 className="mb-4 text-center text-sm font-bold text-white sm:text-base">
+            <h3 className="shrink-0 text-center text-sm font-bold text-white drop-shadow sm:text-base">
                 میزان مصرف هفتگی شما چقدر است؟
             </h3>
 
@@ -131,7 +137,7 @@ export default function StageConsumption({
             <div
                 role="radiogroup"
                 aria-label="میزان مصرف هفتگی را انتخاب کنید"
-                className="flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain scroll-px-4 px-4 pb-3 scrollbar-auto"
+                className="flex min-h-0 flex-1 snap-x snap-mandatory items-stretch gap-3 overflow-x-auto overscroll-x-contain scroll-px-3 px-1 pb-3"
             >
                 {CONSUMPTION_OPTIONS.map((option) => {
                     const active = option.id === selectedConsumptionId;

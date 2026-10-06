@@ -149,9 +149,9 @@ export default function StageCheckout({
     return (
         <section
             aria-label="تکمیل سفارش"
-            className="absolute lg:top-auto top-5 inset-x-0 bottom-0 z-10 flex justify-center px-3 pb-4 sm:px-6 sm:pb-6 md:h-full h-auto"
+            className="absolute inset-x-0 bottom-0 top-16 z-10 flex justify-center overflow-hidden px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-6 sm:pb-6 sm:pt-2 lg:top-20"
         >
-            <div className="w-full max-w-5xl rounded-3xl border border-black/5 bg-[#fbf7ef] shadow-2xl ring-1 ring-black/5 overflow-scroll md:overflow-hidden lg:m-0 mb-5">
+            <div className="flex w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-black/5 bg-[#fbf7ef] shadow-2xl ring-1 ring-black/5">
                 {/* ═══ Top bar ═══════════════════════════════════════ */}
                 <header className="relative flex items-center justify-between gap-3 border-b border-black/5 bg-linear-to-l from-[#1a1512] to-[#2b201a] px-4 py-3 text-white sm:px-6 sm:py-4">
                     <div className="flex items-center gap-3">
@@ -187,8 +187,8 @@ export default function StageCheckout({
                     )}
                 </header>
 
-                {/* ═══ Body ══════════════════════════════════════════ */}
-                <div className="grid grid-cols-1 gap-4 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-6 lg:p-6">
+                {/* ═══ Body — single scroll container so phones can reach the submit button ═══ */}
+                <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-6 lg:p-6">
                     {/* ── Form (left in DOM, right visually in RTL) ─── */}
                     <form
                         onSubmit={handleSubmit}

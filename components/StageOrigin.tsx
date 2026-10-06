@@ -55,18 +55,20 @@ export default function StageOrigin({
         ORIGINS.find((o) => o.id === focusedOriginId) ?? ORIGINS[0] ?? null;
 
     return (
-        <div
-            className="absolute bottom-[4%] left-1/2 z-10 w-full max-w-[92%] -translate-x-1/2 transition-opacity duration-500 sm:max-w-175"
-        >
-            {/* ── Ratings preview ─────────────────────────────────── */}
-            <div className="mx-auto mb-3 w-full max-w-60 md:flex hidden">
-                <ul className="flex w-xs -mr-96 flex-col gap-2 rounded-2xl bg-[#1a1512] p-3 text-white shadow-lg">
+        <div className="absolute inset-x-0 bottom-[5%] z-10 flex max-h-[min(68vh,560px)] flex-col gap-3 overflow-hidden px-3 sm:inset-x-auto sm:left-1/2 sm:max-h-none sm:w-full sm:max-w-2xl sm:-translate-x-1/2 sm:px-0">
+            {/* ── Ratings preview — collapsible on mobile so carousel stays reachable ── */}
+            <details className="mx-auto w-full max-w-sm rounded-2xl bg-coffee-900 p-3 text-white shadow-lg sm:max-w-none sm:bg-coffee-900 sm:[&>summary]:hidden sm:open:block open:block" open>
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-xs font-bold text-caramel sm:hidden">
+                    <span>ویژگی‌های طعمی خاستگاه انتخابی</span>
+                    <span className="grid h-6 w-6 place-items-center rounded-full bg-white/10 text-white/80">⌄</span>
+                </summary>
+                <ul className="mt-3 flex w-full flex-col gap-2 sm:mt-0">
                     {RATING_LABELS.map(([key, label]) => {
                         const currentValue = focusedOrigin?.[key] ?? "medium";
                         return (
                             <li
                                 key={String(key)}
-                                className="flex items-center justify-between gap-3"
+                                className="flex items-center justify-between gap-2 sm:gap-3"
                             >
                                 <div className="flex shrink-0 items-center gap-2">
                                     <RatingIcon
@@ -81,7 +83,7 @@ export default function StageOrigin({
                                 <div
                                     role="radiogroup"
                                     aria-label={label}
-                                    className="flex flex-1 justify-end gap-1.5"
+                                    className="flex flex-1 justify-end gap-1 sm:gap-1.5"
                                 >
                                     {RATING_LEVELS.map((level) => {
                                         const active = currentValue === level.key;
@@ -90,7 +92,7 @@ export default function StageOrigin({
                                                 key={level.key}
                                                 role="radio"
                                                 aria-checked={active}
-                                                className={`rounded-lg border px-3 py-1.5 text-center text-[0.7rem] font-semibold transition ${active
+                                                className={`min-h-7 rounded-lg border px-2 py-1 text-center text-[0.65rem] font-semibold leading-none transition sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[0.7rem] ${active
                                                         ? "border-caramel bg-caramel/10 text-caramel"
                                                         : "border-white/15 text-white/55"
                                                     }`}
@@ -113,18 +115,18 @@ export default function StageOrigin({
                         پیشنهاد می‌شود.
                     </p>
                 </div>
-            </div>
+            </details>
 
             {/* ── Section title ───────────────────────────────────── */}
-            <h4 className="mx-auto mb-2 w-fit rounded-xl bg-black/40 px-3 py-1.5 text-center text-xs font-bold text-white backdrop-blur-sm sm:text-sm">
+            <h4 className="mx-auto w-fit rounded-xl bg-black/40 px-3 py-1.5 text-center text-xs font-bold text-white backdrop-blur-sm sm:text-sm">
                 کشور محل کشت قهوه عربیکا خود را انتخاب نمایید
             </h4>
 
-            {/* ── Origin carousel ─────────────────────────────────── */}
+            {/* ── Origin carousel — flex-1 so it can shrink when preview is open ── */}
             <div
                 role="radiogroup"
                 aria-label="خاستگاه عربیکا را انتخاب کنید"
-                className="flex snap-x snap-mandatory justify-start gap-3 overflow-x-auto overscroll-x-contain scroll-px-4 px-4 pb-3 scrollbar-hidden"
+                className="flex min-h-0 flex-1 snap-x snap-mandatory items-stretch gap-3 overflow-x-auto overscroll-x-contain scroll-px-3 px-1 pb-3 sm:px-4 hide-scrollbar"
             >
                 {ORIGINS.map((origin) => {
                     const isFocused = focusedOriginId === origin.id;
@@ -141,7 +143,7 @@ export default function StageOrigin({
                                 setFocusedOriginId(origin.id);
                                 onSelectOrigin(origin);
                             }}
-                            className={`group relative h-56 w-36 shrink-0 snap-center overflow-hidden rounded-2xl border-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caramel sm:h-44 sm:w-30 ${isFocused
+                            className={`group relative h-48 w-32 shrink-0 snap-center overflow-hidden rounded-2xl border-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caramel sm:h-44 sm:w-32 ${isFocused
                                     ? "border-caramel shadow-[0_0_0_3px_rgba(0,0,0,0.4)]"
                                     : "border-white/15"
                                 }`}
@@ -158,7 +160,7 @@ export default function StageOrigin({
                             {/* Dark gradient */}
                             <span
                                 aria-hidden
-                                className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/20 to-black/85"
+                                className="absolute inset-0 bg-linear-to-b from-black/55 via-black/20 to-black/85"
                             />
 
                             {/* Card content */}

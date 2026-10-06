@@ -23,7 +23,7 @@ export default function StageMethod({
     onSelectMethod,
 }: StageMethodProps) {
     return (
-        <div className="absolute bottom-[5%] left-1/2 z-10 w-full max-w-[92%] -translate-x-1/2 transition-opacity duration-500 sm:max-w-176">
+        <div className="absolute bottom-[7%] left-1/2 z-10 w-full max-w-[92%] -translate-x-1/2 transition-opacity duration-500 sm:max-w-176">
             <div
                 role="group"
                 aria-label="روش دم‌آوری را انتخاب کنید"

@@ -63,14 +63,14 @@ export default function StageTaste({
 
     return (
         <div
-            className="absolute bottom-[4%] left-1/2 z-10 w-full max-w-[92%] -translate-x-1/2 transition-opacity duration-500 sm:max-w-175">
+            className="absolute bottom-[5%] left-1/2 z-10 w-full max-w-[92%] -translate-x-1/2 transition-opacity duration-500 sm:max-w-175">
             {/* ── Top row: selected device + advisor note ───────────── */}
 
             <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                 {/* Selected device */}
 
                 {/* Advisor note */}
-                <div className="w-full max-w-40 rounded-3xl bg-[#1a1512] p-4 text-white shadow-lg hidden md:grid">
+                <div className="w-full max-w-40 rounded-3xl bg-coffee-900 p-4 text-white shadow-lg hidden md:grid">
                     <h4 className="mb-1 text-sm font-bold text-caramel">
                         راهنما
                     </h4>
