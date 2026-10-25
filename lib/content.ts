@@ -52,7 +52,6 @@ export type Origin = {
   /** Short tasting-note blurb, may contain a newline. */
   tasting?: string;
   /** Brew-method icons this origin is well-suited to. */
-  suitableForIcons?: string[];
 };
 
 export const BREW_METHODS: BrewMethod[] = [
@@ -151,15 +150,9 @@ export const ORIGINS: Origin[] = [
     id: 1,
     name: "برزیل",
     slug: "kenya",
-    image: "/media/origins/kenya.jpg",
-    flag: "/media/flags/kenya.png",
+    image: "/media/origins/brazil.png",
+    flag: "/media/flags/brazil.png",
     tasting: "میوه‌ای، اسیدی\nو پرحسم",
-    suitableForIcons: [
-      "/media/icons/espresso.svg",
-      "/media/icons/filter.svg",
-      "/media/icons/pour-over.svg",
-      "/media/icons/cold-brew.svg",
-    ],
     order: 0,
     acidity: "high",
     acidity_display: "زیاد",
@@ -179,12 +172,6 @@ export const ORIGINS: Origin[] = [
     image: "/media/origins/colombia.jpg",
     flag: "/media/flags/colombia.png",
     tasting: "معتدل، شکلاتی\nو شیرین",
-    suitableForIcons: [
-      "/media/icons/espresso.svg",
-      "/media/icons/milk.svg",
-      "/media/icons/filter.svg",
-      "/media/icons/cold-brew.svg",
-    ],
     order: 1,
     acidity: "medium",
     acidity_display: "متوسط",
@@ -204,11 +191,6 @@ export const ORIGINS: Origin[] = [
     image: "/media/origins/peru.jpg",
     flag: "/media/flags/peru.png",
     tasting: "ملایم، آجیلی\nو متعادل",
-    suitableForIcons: [
-      "/media/icons/milk.svg",
-      "/media/icons/filter.svg",
-      "/media/icons/pour-over.svg",
-    ],
     order: 2,
     acidity: "low",
     acidity_display: "کم",
@@ -228,11 +210,6 @@ export const ORIGINS: Origin[] = [
     image: "/media/origins/ethiopia.jpg",
     flag: "/media/flags/ethiopia.png",
     tasting: "گلی، مرکباتی\nو روشن",
-    suitableForIcons: [
-      "/media/icons/filter.svg",
-      "/media/icons/pour-over.svg",
-      "/media/icons/cold-brew.svg",
-    ],
     order: 3,
     acidity: "high",
     acidity_display: "زیاد",

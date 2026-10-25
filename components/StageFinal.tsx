@@ -4,6 +4,7 @@ import Image from "next/image";
 import React from "react";
 
 import type { BrewMethod, Origin } from "@/lib/content";
+import { PencilIcon } from "./icon/PencilIcon";
 
 /* ------------------------------------------------------------------ *
  * Dummy assets
@@ -219,7 +220,7 @@ export default function StageFinal({
 function SummaryItem({ icon, label, value, onEdit }: { icon: React.ReactNode; label: string; value: string; onEdit?: () => void; }) {
     const isMissing = value === "انتخاب نشده";
     return (
-        <div className="group/row flex items-center gap-3 py-2.5 transition-colors hover:bg-white/[0.03]">
+        <div className="group/row flex items-center gap-3 py-2.5 transition-colors hover:bg-white/3">
             <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-caramel/10 text-caramel ring-1 ring-caramel/20">{icon}</span>
             <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
                 <dt className="shrink-0 text-[0.7rem] text-white/50">{label}</dt>
@@ -272,9 +273,6 @@ function CoffeeMachineIcon(props: React.SVGProps<SVGSVGElement>) {
     return (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M4 8h12v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" /><path d="M16 10h2a2 2 0 0 1 0 4h-2" /><path d="M9 4v3M13 4v3M2 22h18" /></svg>);
 }
 
-function PencilIcon(props: React.SVGProps<SVGSVGElement>) {
-    return (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4z" /></svg>);
-}
 
 function ArrowIcon(props: React.SVGProps<SVGSVGElement>) {
     return (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M19 12H5M12 5l-7 7 7 7" /></svg>);

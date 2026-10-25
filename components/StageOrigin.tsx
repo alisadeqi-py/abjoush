@@ -9,6 +9,9 @@ import {
     type RatingKey,
     type RatingLevel,
 } from "@/lib/content";
+import { CheckIcon } from "./icon/CheckIcon";
+import { RatingIcon } from "./icon/RatingIcon";
+import { InfoIcon } from "./icon/InfoIcon";
 
 /* ------------------------------------------------------------------ *
  * Constants
@@ -37,6 +40,8 @@ export const RATING_LABELS: ReadonlyArray<[RatingKey, string]> = [
 interface StageOriginProps {
     selectedOrigin: Origin | null;
     onSelectOrigin: (origin: Origin) => void;
+    isOriginA?: boolean
+
 }
 
 /* ------------------------------------------------------------------ *
@@ -46,6 +51,7 @@ interface StageOriginProps {
 export default function StageOrigin({
     selectedOrigin,
     onSelectOrigin,
+    isOriginA
 }: StageOriginProps) {
     const [focusedOriginId, setFocusedOriginId] = useState<number | null>(
         selectedOrigin?.id ?? ORIGINS[0]?.id ?? null
@@ -93,8 +99,8 @@ export default function StageOrigin({
                                                 role="radio"
                                                 aria-checked={active}
                                                 className={`min-h-7 rounded-lg border px-2 py-1 text-center text-[0.65rem] font-semibold leading-none transition sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[0.7rem] ${active
-                                                        ? "border-caramel bg-caramel/10 text-caramel"
-                                                        : "border-white/15 text-white/55"
+                                                    ? "border-caramel bg-caramel/10 text-caramel"
+                                                    : "border-white/15 text-white/55"
                                                     }`}
                                             >
                                                 {level.label}
@@ -119,7 +125,7 @@ export default function StageOrigin({
 
             {/* ── Section title ───────────────────────────────────── */}
             <h4 className="mx-auto w-fit rounded-xl bg-black/40 px-3 py-1.5 text-center text-xs font-bold text-white backdrop-blur-sm sm:text-sm">
-                کشور محل کشت قهوه عربیکا خود را انتخاب نمایید
+                {isOriginA ? "کشور محل کشت قهوه عربیکا خود را انتخاب نمایید" : "کشور محل کشت قهوه روبوستا خود را انتخاب نمایید"}
             </h4>
 
             {/* ── Origin carousel — flex-1 so it can shrink when preview is open ── */}
@@ -144,8 +150,8 @@ export default function StageOrigin({
                                 onSelectOrigin(origin);
                             }}
                             className={`group relative h-48 w-32 shrink-0 snap-center overflow-hidden rounded-2xl border-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caramel sm:h-44 sm:w-32 ${isFocused
-                                    ? "border-caramel shadow-[0_0_0_3px_rgba(0,0,0,0.4)]"
-                                    : "border-white/15"
+                                ? "border-caramel shadow-[0_0_0_3px_rgba(0,0,0,0.4)]"
+                                : "border-white/15"
                                 }`}
                         >
                             {/* Background photo */}
@@ -186,33 +192,6 @@ export default function StageOrigin({
                                         {origin.tasting}
                                     </p>
                                 )}
-
-                                {origin.suitableForIcons &&
-                                    origin.suitableForIcons.length > 0 && (
-                                        <div className="mt-auto w-full">
-                                            <p className="mb-1 text-[0.6rem] font-semibold text-white/70">
-                                                مناسب برای:
-                                            </p>
-                                            <div className="flex items-center justify-center gap-1">
-                                                {origin.suitableForIcons.map(
-                                                    (iconSrc, i) => (
-                                                        <span
-                                                            key={i}
-                                                            className="grid h-4 w-4 place-items-center rounded-full bg-white/85"
-                                                        >
-                                                            <Image
-                                                                src={iconSrc}
-                                                                alt=""
-                                                                width={12}
-                                                                height={12}
-                                                                className="h-3 w-3 object-contain"
-                                                            />
-                                                        </span>
-                                                    )
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
                             </div>
 
                             {/* Selected check */}
@@ -228,82 +207,7 @@ export default function StageOrigin({
                     );
                 })}
             </div>
-        </div>
+        </div >
     );
 }
 
-/* ------------------------------------------------------------------ *
- * Rating type icons (decorative — one per rating attribute)
- * ------------------------------------------------------------------ */
-
-function RatingIcon({
-    name,
-    className,
-}: React.SVGProps<SVGSVGElement> & { name: RatingKey }) {
-    return (
-        <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={className}
-            aria-hidden="true"
-        >
-            {name === "acidity" && (
-                <path d="M12 2c-3.3 0-6 2.7-6 6 0 3.3 6 7.5 6 7.5s6-4.2 6-7.5C18 4.7 15.3 2 12 2z" />
-            )}
-            {name === "sweetness" && (
-                <path d="M12 2l2.5 7.5H22l-5 4 2.5 7.5-5-4-5 4 2.5-7.5L4 9.5h9.5z" />
-            )}
-            {name === "bitterness" && (
-                <>
-                    <path d="M5 12c0-3.8 3.2-7 7-7s7 3.2 7 7-3.2 7-7 7-7-3.2-7-7z" />
-                    <path d="M9 9c1.2 2.2 3.3 3.7 5.6 4" />
-                    <path d="M15 9c-1.2-2.2-3.3-3.7-5.6-4" />
-                </>
-            )}
-            {name !== "acidity" && name !== "sweetness" && name !== "bitterness" && (
-                <circle cx="12" cy="12" r="3" />
-            )}
-        </svg>
-    );
-}
-
-/* ------------------------------------------------------------------ *
- * Icons
- * ------------------------------------------------------------------ */
-
-function CheckIcon(props: React.SVGProps<SVGSVGElement>) {
-    return (
-        <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            {...props}
-        >
-            <path d="M20 6 9 17l-5-5" />
-        </svg>
-    );
-}
-
-function InfoIcon(props: React.SVGProps<SVGSVGElement>) {
-    return (
-        <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            {...props}
-        >
-            <circle cx="12" cy="12" r="9" />
-            <path d="M12 8h.01M11 12h1v4h1" />
-        </svg>
-    );
-}

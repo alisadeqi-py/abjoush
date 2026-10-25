@@ -1,22 +1,12 @@
-"use client";
-
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useCallback, useRef } from "react";
 
 import type { BrewMethod } from "@/lib/content";
-
-function dummyIcon(color: string, glyph: string): string {
-    const svg = `
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-            <circle cx="32" cy="32" r="28" fill="${color}" />
-            <text x="32" y="42" font-size="28" text-anchor="middle"
-                  font-family="system-ui, sans-serif" fill="#fff">${glyph}</text>
-        </svg>
-    `.trim();
-    return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
-}
-
-const dummyDevice = dummyIcon("#6b4f3a", "☕");
+import { CARD_GAP, PRODUCT_CARD_WIDTH } from "@/lib/constants";
+import { useHorizontalScroll } from "@/hooks/useHorizontalScroll";
+import { PencilIcon } from "./icon/PencilIcon";
+import { CheckIcon } from "./icon/CheckIcon";
+import { ScrollButton } from "./scroll-button";
 
 /* ------------------------------------------------------------------ *
  * Types & data
@@ -25,7 +15,7 @@ const dummyDevice = dummyIcon("#6b4f3a", "☕");
 export interface TasteOption {
     id: number;
     name: string;
-    icon: string;
+    image: string;
     rating: number;
 }
 
@@ -39,14 +29,13 @@ interface StageTasteProps {
 }
 
 export const TASTE_OPTIONS: TasteOption[] = [
-    { id: 1, name: "شکلاتی و کاراملی", icon: dummyIcon("#8b5e3c", "🍫"), rating: 3 },
-    { id: 2, name: "میوه‌ای و شراب", icon: dummyIcon("#b34a4a", "🍑"), rating: 2 },
-    { id: 3, name: "گلی و شکوفه", icon: dummyIcon("#c96fa0", "🌸"), rating: 3 },
-    { id: 4, name: "آجیلی و کاراملی", icon: dummyIcon("#a9743f", "🥜"), rating: 1 },
-    { id: 5, name: "شکلاتی و تیره", icon: dummyIcon("#4a2f22", "🍩"), rating: 3 },
-    { id: 6, name: "میوه‌ای و مرکبات", icon: dummyIcon("#d1912f", "🍊"), rating: 2 },
+    { id: 2, name: "میوه‌ای و شراب", image: "/images/tastes/fruity.webp", rating: 2 },
+    { id: 1, name: "شکلاتی و کاراملی", image: "/images/tastes/chocolate-caramel.webp", rating: 3 },
+    { id: 4, name: "آجیلی و کاراملی", image: "/images/tastes/nutty-caramel.webp", rating: 1 },
+    { id: 3, name: "گلی و شکوفه", image: "/images/tastes/floral-blossom.webp", rating: 3 },
+    { id: 5, name: "ملایم", image: "/images/tastes/feather.webp", rating: 3 },
+    { id: 6, name: "تلخ و قوی", image: "/images/tastes/power.webp", rating: 2 },
 ];
-
 /* ------------------------------------------------------------------ *
  * Component
  * ------------------------------------------------------------------ */
@@ -60,6 +49,29 @@ export default function StageTaste({
     onEditDevice,
 }: StageTasteProps) {
     const selectedTaste = TASTE_OPTIONS.find((t) => t.id === selectedTasteId);
+    const draggedRef = useRef(false);
+
+    const {
+        scrollRef,
+        scrollProgress,
+        scrollByAmount,
+        onMouseDown,
+    } = useHorizontalScroll(PRODUCT_CARD_WIDTH, CARD_GAP);
+
+    const handleMouseDown = useCallback(
+        (e: React.MouseEvent<HTMLDivElement>) => {
+            draggedRef.current = false;
+            const startX = e.clientX;
+            const onUp = () => {
+                if (Math.abs(e.clientX - startX) > 4) draggedRef.current = true;
+                window.removeEventListener("mouseup", onUp);
+            };
+            window.addEventListener("mouseup", onUp);
+            onMouseDown(e);
+        },
+        [onMouseDown]
+    );
+    const progressPct = Math.max(6, Math.round(scrollProgress * 100));
 
     return (
         <div
@@ -80,13 +92,13 @@ export default function StageTaste({
                     </p>
                 </div>
 
-                <div className="w-full max-w-xs rounded-3xl bg-[#1a1512] p-4 text-center shadow-lg hidden md:grid">
+                <div className="w-full max-w-xs rounded-3xl bg-coffee-900 p-4 text-center shadow-lg hidden md:grid">
                     <p className="mb-3 text-xs font-semibold text-amber-100">
                         خاستگاه انتخاب شده
                     </p>
                     <div className="mb-3 flex items-center justify-center gap-3">
                         <Image
-                            src={selectedMethod?.image || dummyDevice}
+                            src={selectedMethod?.image || ""}
                             alt={selectedMethod?.name || ""}
                             width={96}
                             height={96}
@@ -122,15 +134,28 @@ export default function StageTaste({
                 سلیقه و طعم مورد علاقه‌ات را انتخاب کن
             </h3>
 
-            {/* ── Flavor carousel ───────────────────────────────────── */}
-            {/* ── Flavor carousel ───────────────────────────────────── */}
-            <div
-                role="radiogroup"
-                aria-label="طعم مورد علاقه را انتخاب کنید"
-                className="scrollbar-hidden w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain pb-3"
-                style={{ WebkitOverflowScrolling: "touch" }}
-            >
-                <div className="flex gap-3 px-4 overflow-auto">
+            <div className="relative">
+                {/* Nav arrows — overlay the carousel edges */}
+                <div className="pointer-events-none absolute inset-y-0 left-0 z-30 flex items-center">
+                    <ScrollButton
+                        direction="left"
+                        onClick={() => scrollByAmount("left")}
+                    />
+                </div>
+                <div className="pointer-events-none absolute inset-y-0 right-0 z-30 flex items-center">
+                    <ScrollButton
+                        direction="right"
+                        onClick={() => scrollByAmount("right")}
+                    />
+                </div>
+
+                <div
+                    ref={scrollRef}
+                    role="radiogroup"
+                    aria-label="روش دم‌آوری را انتخاب کنید"
+                    className="scrollbar-hidden flex cursor-grab flex-nowrap gap-4 overflow-auto scroll-px-4 pb-6 pt-2 active:cursor-grabbing"
+                    onMouseDown={handleMouseDown}
+                >
                     {TASTE_OPTIONS.map((taste) => {
                         const active = taste.id === selectedTasteId;
                         return (
@@ -140,60 +165,75 @@ export default function StageTaste({
                                 role="radio"
                                 aria-checked={active}
                                 onClick={() => onSelectTaste(taste.id)}
-                                className={`group flex h-44 w-28 shrink-0 snap-center flex-col items-center rounded-2xl border-2 bg-[#f5efe6] p-3 backdrop-blur-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caramel sm:h-48 sm:w-32 ${active
-                                        ? "border-caramel shadow-[0_0_0_3px_rgba(0,0,0,0.4)]"
-                                        : "border-white/10 hover:border-white/25"
+                                className={`group flex justify-between h-44 w-28 shrink-0 snap-center flex-col items-center rounded-2xl border-2 bg-[#f5efe6] p-3 backdrop-blur-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caramel sm:h-48 sm:w-32 ${active
+                                    ? "border-caramel shadow-[0_0_0_3px_rgba(0,0,0,0.4)]"
+                                    : "border-white/10 hover:border-white/25"
                                     }`}
                             >
-                                <span
-                                    className={`mb-3 grid h-12 w-12 place-items-center rounded-full transition ${active ? "bg-caramel/15" : "bg-white/5"
-                                        }`}
-                                >
-                                    <Image
-                                        src={taste.icon}
-                                        alt=""
-                                        width={32}
-                                        height={32}
-                                        className="h-7 w-7 object-contain"
-                                        unoptimized
-                                    />
-                                </span>
+
+                                <Image
+                                    src={taste.image}
+                                    alt=""
+                                    width={32}
+                                    height={32}
+                                    className="h-14 w-14 object-contain rounded-2xl"
+                                    unoptimized
+                                />
 
                                 <span
-                                    className={`mb-2 line-clamp-2 text-center text-[0.7rem] font-semibold leading-tight ${active ? "text-caramel" : ""
+                                    className={`mb-2 line-clamp-2 text-center text-[0.7rem] font-semibold leading-tight ${active ? "text-caramel" : "text-black"
                                         }`}
                                 >
                                     {taste.name}
                                 </span>
 
-                                <span className="mb-2 flex gap-1">
-                                    {[0, 1, 2].map((i) => (
-                                        <span
-                                            key={i}
-                                            className={`h-1.5 w-1.5 rounded-full ${i < taste.rating
+
+
+                                <div className="">
+                                    <span className="mb-2 flex gap-1">
+                                        {[0, 1, 2].map((i) => (
+                                            <span
+                                                key={i}
+                                                className={`h-1.5 w-1.5 rounded-full ${i < taste.rating
                                                     ? active
                                                         ? "bg-caramel"
-                                                        : "bg-white/60"
+                                                        : "bg-black"
                                                     : "bg-white/15"
-                                                }`}
-                                        />
-                                    ))}
-                                </span>
-
-                                <span
-                                    aria-hidden
-                                    className={`mt-auto grid h-5 w-5 place-items-center rounded-full transition ${active
-                                            ? "bg-caramel text-white ring-2 ring-white/70"
+                                                    }`}
+                                            />
+                                        ))}
+                                    </span>
+                                    <span
+                                        aria-hidden
+                                        className={`mt-auto grid h-5 w-5 place-items-center rounded-full transition ${active
+                                            ? "bg-caramel ring-2 ring-white/70"
                                             : "border border-white/20 text-transparent"
-                                        }`}
-                                >
-                                    <CheckIcon className="h-3 w-3" />
-                                </span>
+                                            }`}
+                                    >
+                                        <CheckIcon className="h-3 w-3" />
+                                    </span>
+                                </div>
                             </button>
                         );
                     })}
                 </div>
+
+                {/* Progress bar */}
+                <div
+                    className="mx-auto mt-2 h-1 w-40 overflow-hidden rounded-full bg-latte"
+                    role="progressbar"
+                    aria-valuenow={progressPct}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuetext={`${progressPct}% اسکرول شده`}
+                >
+                    <div
+                        className="h-full rounded-full bg-roast transition-[width] duration-150 ease-out"
+                        style={{ width: `${progressPct}%` }}
+                    />
+                </div>
             </div>
+
             <p className="sr-only" aria-live="polite">
                 {selectedTaste
                     ? `طعم انتخاب شده: ${selectedTaste.name}`
@@ -201,46 +241,5 @@ export default function StageTaste({
                 . نسبت فعلی: {robusta} درصد روبستا، {arabica} درصد عربیکا.
             </p>
         </div >
-    );
-}
-
-/* ------------------------------------------------------------------ *
- * Icons
- * ------------------------------------------------------------------ */
-
-function PencilIcon(props: React.SVGProps<SVGSVGElement>) {
-    return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
-            strokeLinecap="round" strokeLinejoin="round" {...props}>
-            <path d="M12 20h9" />
-            <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4z" />
-        </svg>
-    );
-}
-
-function CheckIcon(props: React.SVGProps<SVGSVGElement>) {
-    return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"
-            strokeLinecap="round" strokeLinejoin="round" {...props}>
-            <path d="M20 6 9 17l-5-5" />
-        </svg>
-    );
-}
-
-function ChevronLeftIcon(props: React.SVGProps<SVGSVGElement>) {
-    return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
-            strokeLinecap="round" strokeLinejoin="round" {...props}>
-            <path d="M15 6l-6 6 6 6" />
-        </svg>
-    );
-}
-
-function ChevronRightIcon(props: React.SVGProps<SVGSVGElement>) {
-    return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
-            strokeLinecap="round" strokeLinejoin="round" {...props}>
-            <path d="M9 6l6 6-6 6" />
-        </svg>
     );
 }

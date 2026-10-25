@@ -4,6 +4,7 @@ import Image from "next/image";
 import React, { useId, useMemo, useState } from "react";
 
 import type { BrewMethod, Origin } from "@/lib/content";
+import { PencilIcon } from "./icon/PencilIcon";
 
 /* ------------------------------------------------------------------ *
  * Dummy assets
@@ -790,16 +791,6 @@ function BagIcon(props: React.SVGProps<SVGSVGElement>) {
             strokeLinecap="round" strokeLinejoin="round" {...props}>
             <path d="M6 6h12v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z" />
             <path d="M6 6l2-3h8l2 3" />
-        </svg>
-    );
-}
-
-function PencilIcon(props: React.SVGProps<SVGSVGElement>) {
-    return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
-            strokeLinecap="round" strokeLinejoin="round" {...props}>
-            <path d="M12 20h9" />
-            <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4z" />
         </svg>
     );
 }

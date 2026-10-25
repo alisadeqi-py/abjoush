@@ -3,21 +3,34 @@
 interface ScrollButtonProps {
   direction: "left" | "right";
   onClick: () => void;
+  disabled?: boolean;
+  className?: string;
 }
 
-export function ScrollButton({ direction, onClick }: ScrollButtonProps) {
+export function ScrollButton({
+  direction,
+  onClick,
+  disabled = false,
+  className = "",
+}: ScrollButtonProps) {
   const isLeft = direction === "left";
 
   return (
     <button
+      type="button"
       onClick={onClick}
-      className="w-9 h-9 rounded-full bg-foam border border-latte
-                 flex items-center justify-center text-clay
-                 hover:bg-espresso hover:border-espresso hover:text-foam
-                 active:scale-95
-                 transition-all duration-200 shadow-sm
-                 focus:outline-none focus-visible:ring-2 focus-visible:ring-caramel"
+      disabled={disabled}
+      className={`pointer-events-auto w-9 h-9 rounded-full bg-foam border border-latte
+                  flex items-center justify-center text-clay
+                  hover:bg-espresso hover:border-espresso hover:text-foam
+                  active:scale-95
+                  transition-all duration-200 shadow-sm
+                  focus:outline-none focus-visible:ring-2 focus-visible:ring-caramel
+                  disabled:pointer-events-none disabled:scale-90
+                  ${className}`}
       aria-label={isLeft ? "اسکرول به چپ" : "اسکرول به راست"}
+      aria-hidden={disabled || undefined}
+      tabIndex={disabled ? -1 : 0}
     >
       {isLeft ? (
         <svg
